@@ -294,24 +294,25 @@ require('lazy').setup({
   { 'wakatime/vim-wakatime', lazy = false },
   { 'nvim-lualine/lualine.nvim', dependencies = { 'nvim-tree/nvim-web-devicons' },
       config = function()
-      local function getwords()
+      local function get_word_count()
         if vim.bo.filetype == 'md' or vim.bo.filetype == 'markdown' then
           local icon = '\u{e6a5}'
-          local word_count = vim.fn.wordcount().words
-          return word_count .. ' ' .. icon
+          local words = vim.fn.wordcount().words
+          return string.format('%s %s', words, icon)
         end
+	return ''
       end
 
       require('lualine').setup {
         sections = {
           lualine_x = {
-            { getwords },
+            { get_word_count },
+	    'filetype',
           },
         },
       }
     end,
   },
-   },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
