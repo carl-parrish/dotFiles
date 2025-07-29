@@ -1,0 +1,28 @@
+set -gx EDITOR nvim
+set -gx EZA_COLORS "da=34:di=34:ex=32:fi=0:ln=36:or=31:pi=33:so=35:su=31:tw=31"
+
+# setup env vars
+fish_add_path ~/.cargo/bin
+fish_add_path ~/.local/bin
+fish_add_path ~/.local/bin/zen/zen
+fish_add_path /usr/local/bin
+fish_add_path ~/go/bin
+
+# setup alias
+source ~/.config/fish/aliases/common.fish
+
+# vi key binding
+fish_vi_key_bindings
+
+if status is-interactive
+  atuin init fish | source
+  starship init fish | source
+end
+
+# This block MUST be at the end of config.fish
+if status is-interactive
+    if test -n "$WEZTERM_PANE"
+        # Source the Wezterm-specific shell integration script for Fish
+        source (wezterm shell-integration --fish)
+    end
+end
