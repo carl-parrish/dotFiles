@@ -8,6 +8,7 @@ fish_add_path ~/.local/bin/zen/zen
 fish_add_path /usr/local/bin
 fish_add_path /usr/local/go/bin
 fish_add_path $HOME/go/bin
+fish_add_path ~/.npm/bin
 
 # setup alias
 source ~/.config/fish/aliases/common.fish
@@ -15,16 +16,10 @@ source ~/.config/fish/aliases/common.fish
 # vi key binding
 fish_vi_key_bindings
 
-if status is-interactive:
+if status is-interactive
   atuin init fish | source
   starship init fish | source
   zoxide init --cmd cd fish | source
+
 end
 
-# This block MUST be at the end of config.fish
-if status is-interactive
-    if test -n "$WEZTERM_PANE"
-        # Source the Wezterm-specific shell integration script for Fish
-        source (wezterm shell-integration --fish)
-    end
-end
