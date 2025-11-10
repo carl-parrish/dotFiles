@@ -1,6 +1,8 @@
 tags
-test.sh
 .luarc.json
-nvim
+lazy-lock.json
+.stylua.toml
+history.txt
+.DS_Store
 
 spell/
