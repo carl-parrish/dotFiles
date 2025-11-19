@@ -16,6 +16,12 @@ source ~/.config/fish/aliases/common.fish
 # vi key binding
 fish_vi_key_bindings
 
+# Load encrypted secrets if present
+set secrets_file "$HOME/.config/fish/conf.d/secrets.fish"
+if test -f $secrets_file
+    source $secrets_file
+end
+
 if status is-interactive
   atuin init fish | source
   starship init fish | source
