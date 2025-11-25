@@ -10,7 +10,7 @@ set -gx EZA_COLORS "da=34:di=34:ex=32:fi=0:ln=36:or=31:pi=33:so=35:su=31:tw=31"
 # =========================
 # Homebrew (macOS)
 # =========================
-if test $IS_DARWIN -eq 1
+if test (uname) = "Darwin"
     if test -x /opt/homebrew/bin/brew
         eval "$(/opt/homebrew/bin/brew shellenv)"
     end
@@ -29,7 +29,7 @@ fish_add_path $HOME/go/bin
 fish_add_path ~/.npm/bin
 
 # macOS-specific paths
-if test $IS_DARWIN -eq 1
+if test (uname) = "Darwin"
     fish_add_path /opt/homebrew/bin
     fish_add_path /opt/homebrew/opt
 end
@@ -56,6 +56,12 @@ end
 # Interactive-only init
 # =========================
 if status is-interactive
+    # 1. Initialize mise (The Version Manager)
+    # Check if it exists first so this config doesn't break on new installs
+    if type -q mise
+        mise activate fish | source
+    end
+
     if type -q atuin
         atuin init fish | source
     end
@@ -72,7 +78,7 @@ end
 # =========================
 # mac-mini specific tweaks
 # =========================
-if test "$HOSTNAME" = "Mac-mini.local"
+ if test "$HOSTNAME" = "Mac-mini.local"
     # Starship config path
     set -gx STARSHIP_CONFIG $HOME/.config/starship/starship.toml
 
@@ -88,6 +94,7 @@ if test "$HOSTNAME" = "Mac-mini.local"
     if test -e $HOME/.iterm2_shell_integration.fish
         source $HOME/.iterm2_shell_integration.fish
     end
+end
 # =========================
 # Hooks for other hosts (Linux boxes)
 # =========================
