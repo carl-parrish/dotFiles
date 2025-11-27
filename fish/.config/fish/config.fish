@@ -54,6 +54,9 @@ end
 # Interactive-only init
 # =========================
 if status is-interactive
+    # Set TTY for GPG pinentry prompts
+    set -x GPG_TTY (tty)
+
     # 1. Initialize mise (The Version Manager)
     # Check if it exists first so this config doesn't break on new installs
     if type -q mise
