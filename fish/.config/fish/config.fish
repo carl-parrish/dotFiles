@@ -26,13 +26,6 @@ fish_add_path ~/.local/bin/zen/zen
 fish_add_path /usr/local/bin
 fish_add_path /usr/local/go/bin
 fish_add_path $HOME/go/bin
-fish_add_path ~/.npm/bin
-
-# macOS-specific paths
-if test (uname) = "Darwin"
-    fish_add_path /opt/homebrew/bin
-    fish_add_path /opt/homebrew/opt
-end
 
 # =========================
 # Aliases (shared)
@@ -106,4 +99,3 @@ end
 # if test "$HOSTNAME" = "raspberrypi"
 #     # pi-specific tweaks
 # end
-status --is-interactive && pyenv init - | source
