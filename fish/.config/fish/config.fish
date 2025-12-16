@@ -106,3 +106,4 @@ end
 # if test "$HOSTNAME" = "raspberrypi"
 #     # pi-specific tweaks
 # end
+status --is-interactive && pyenv init - | source
