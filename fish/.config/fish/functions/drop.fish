@@ -4,4 +4,4 @@ function drop
         return 1
     end
     cp $argv ~/Taildrop/
-end:
+end

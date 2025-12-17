@@ -83,10 +83,6 @@ end
         wezterm cli set-user-var --pane-id $WEZTERM_PANE shellBgImagePath "$shellBgImagePath"
     end
 
-    # iTerm2 shell integration
-    if test -e $HOME/.iterm2_shell_integration.fish
-        source $HOME/.iterm2_shell_integration.fish
-    end
 end
 # =========================
 # Hooks for other hosts (Linux boxes)

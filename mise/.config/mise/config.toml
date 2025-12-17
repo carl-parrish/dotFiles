@@ -1,4 +1,5 @@
 [tools]
+atuin = "latest"
 go = "1.25.4"
 "npm:pnpm" = "latest"
 "npm:typescript" = "latest"
