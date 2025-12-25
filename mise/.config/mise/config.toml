@@ -7,3 +7,12 @@ go = "1.25.4"
 "npm:typescript" = "latest"
 python = "3.12"
 ruby = "3.3"
+
+[tasks.setup-hooks]
+description = "Link .githooks to git config for auto-updates"
+dir = "~/dotFiles"  # Ensures this runs in the correct repo
+run = [
+  "git config core.hooksPath .githooks",
+  "chmod +x .githooks/post-merge",
+  "echo '✅ Git hooks wired up! Next git pull will trigger auto-installs.'"
+]
