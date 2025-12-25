@@ -1,6 +1,8 @@
 [tools]
 atuin = "latest"
+"cargo:spec-kit-mcp" = "latest"
 go = "1.25.4"
+"npm:@infisical/cli" = "latest"
 "npm:pnpm" = "latest"
 "npm:typescript" = "latest"
 python = "3.12"

@@ -20,12 +20,17 @@ end
 # PATH setup (shared + per-OS)
 # =========================
 
-fish_add_path ~/.cargo/bin
-fish_add_path ~/.local/bin
-fish_add_path ~/.local/bin/zen/zen
+fish_add_path $HOME/.cargo/bin
+fish_add_path $HOME/.local/bin
+fish_add_path $HOME/.local/bin/zen/zen
 fish_add_path /usr/local/bin
 fish_add_path /usr/local/go/bin
 fish_add_path $HOME/go/bin
+
+# Antigravity (Added dynamically if present)
+if test -d "$HOME/.antigravity/antigravity/bin"
+    fish_add_path "$HOME/.antigravity/antigravity/bin"
+end
 
 # =========================
 # Aliases (shared)
