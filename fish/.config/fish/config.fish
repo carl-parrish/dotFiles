@@ -32,10 +32,21 @@ fish_add_path /usr/local/bin
 fish_add_path /usr/local/go/bin
 fish_add_path $HOME/go/bin
 
+
 # Antigravity (Added dynamically if present)
 if test -d "$HOME/.antigravity/antigravity/bin"
     fish_add_path "$HOME/.antigravity/antigravity/bin"
 end
+
+# Google Cloud
+if test -d "$HOME/google-cloud-sdk/bin/"
+    fish_add_path "$HOME/google-cloud-sdk/bin/"
+end
+
+if test -d "$HOME/.fly/bin/"
+    fish_add_path "$HOME/.fly/bin/"
+end
+
 
 # =========================
 # Aliases (shared)
