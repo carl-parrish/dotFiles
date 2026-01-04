@@ -2,4 +2,4 @@
 # VERSION: 3.0
 SETUVAR __fish_initialized:4300
 SETUVAR fish_key_bindings:fish_default_key_bindings
-SETUVAR fish_user_paths:/Users/cparrish817/\x2efly/bin\x1e/Users/cparrish817/google\x2dcloud\x2dsdk/bin\x1e/Users/cparrish817/\x2eantigravity/antigravity/bin\x1e/Users/cparrish817/go/bin\x1e/usr/local/go/bin\x1e/usr/local/bin\x1e/Users/cparrish817/\x2elocal/bin\x1e/Users/cparrish817/\x2ecargo/bin
+SETUVAR fish_user_paths:/home/cparrish/\x2ecargo/bin\x1e/home/cparrish/\x2elocal/bin\x1e/Users/cparrish817/\x2efly/bin\x1e/Users/cparrish817/google\x2dcloud\x2dsdk/bin\x1e/Users/cparrish817/\x2eantigravity/antigravity/bin\x1e/Users/cparrish817/go/bin\x1e/usr/local/go/bin\x1e/usr/local/bin\x1e/Users/cparrish817/\x2elocal/bin\x1e/Users/cparrish817/\x2ecargo/bin
