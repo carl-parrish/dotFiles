@@ -16,11 +16,12 @@ ruby = "3.3"
 "ubi:starship/starship" = "latest"
 "ubi:zellij-org/zellij" = "latest"
 "ubi:sharkdp/fd" = "latest"
-"ubi:BurntSushi/ripgrep" = "latest"
 "ubi:lsd-rs/lsd" = "latest"
+"npm:@bitwarden/cli" = "latest"
 
-# Use cargo for eza to ensure cross-platform compatibility
+# Use cargo for eza & rg to ensure cross-platform compatibility
 "cargo:eza" = "latest"
+"cargo:ripgrep" = "latest"
 
 [tasks.setup-hooks]
 description = "Link .githooks to git config for auto-updates"

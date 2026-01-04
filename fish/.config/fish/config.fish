@@ -19,6 +19,10 @@ if test (uname) = "Darwin"
     if test -x /opt/homebrew/bin/brew
         eval "$(/opt/homebrew/bin/brew shellenv)"
     end
+
+  set -gx MISE_DATA_DIR $HOME/.local/share/mise
+  set -gx MISE_CONFIG_DIR $HOME/.config/mise
+  set -gx MISE_CACHE_DIR $HOME/.cache/mise
 end
 
 # =========================
@@ -76,7 +80,7 @@ if status is-interactive
     # 1. Initialize mise (The Version Manager)
     # Check if it exists first so this config doesn't break on new installs
     if type -q mise
-        mise activate fish | source
+        mise activate fish --shims | source
     end
 
     if type -q atuin
