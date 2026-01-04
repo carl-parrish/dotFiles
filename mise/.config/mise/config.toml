@@ -9,10 +9,18 @@ node = "20"
 python = "3.12"
 ruby = "3.3"
 "ubi:sharkdp/bat" = "latest"
-"ubi:eza-community/eza" = "latest"
 "ubi:ajeetdsouza/zoxide" = "latest"
 "ubi:bcicen/ctop" = "latest"
 "ubi:cjbassi/gotop" = "latest"  # A more visual version of htop
+"ubi:junegunn/fzf" = "latest"
+"ubi:starship/starship" = "latest"
+"ubi:zellij-org/zellij" = "latest"
+"ubi:sharkdp/fd" = "latest"
+"ubi:BurntSushi/ripgrep" = "latest"
+"ubi:lsd-rs/lsd" = "latest"
+
+# Use cargo for eza to ensure cross-platform compatibility
+"cargo:eza" = "latest"
 
 [tasks.setup-hooks]
 description = "Link .githooks to git config for auto-updates"
