@@ -2,11 +2,17 @@
 atuin = "latest"
 "cargo:spec-kit-mcp" = "latest"
 go = "1.25.4"
+node = "20"
 "npm:@infisical/cli" = "latest"
 "npm:pnpm" = "latest"
 "npm:typescript" = "latest"
 python = "3.12"
 ruby = "3.3"
+"ubi:sharkdp/bat" = "latest"
+"ubi:eza-community/eza" = "latest"
+"ubi:ajeetdsouza/zoxide" = "latest"
+"ubi:bcicen/ctop" = "latest"
+"ubi:cjbassi/gotop" = "latest"  # A more visual version of htop
 
 [tasks.setup-hooks]
 description = "Link .githooks to git config for auto-updates"

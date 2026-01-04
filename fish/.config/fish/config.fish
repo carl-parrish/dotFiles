@@ -7,6 +7,11 @@
 set -gx EDITOR nvim
 set -gx EZA_COLORS "da=34:di=34:ex=32:fi=0:ln=36:or=31:pi=33:so=35:su=31:tw=31"
 
+# ========================
+# Trust dotFise in mise
+# =======================
+set -gx MISE_TRUSTED_CONFIG_PATHS $HOME/dotFiles
+
 # =========================
 # Homebrew (macOS)
 # =========================
@@ -76,10 +81,11 @@ if status is-interactive
     end
 end
 
+
 # =========================
 # mac-mini specific tweaks
 # =========================
- if test "$HOSTNAME" = "Mac-mini.local"
+if string match -q "Mac-mini*" "$hostname"
     # Starship config path
     set -gx STARSHIP_CONFIG $HOME/.config/starship/starship.toml
 
@@ -96,10 +102,10 @@ end
 # Hooks for other hosts (Linux boxes)
 # =========================
 #
-# if test "$HOSTNAME" = "mint-mini"
+# if string match -q "mint-mini" "$hostname"
 #     # mint-specific tweaks
 # end
 #
-# if test "$HOSTNAME" = "raspberrypi"
+# if string match -q  "raspberrypi" "$hostname"
 #     # pi-specific tweaks
 # end

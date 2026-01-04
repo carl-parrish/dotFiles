@@ -24,7 +24,9 @@ alias gcmsg='git commit -m'
 alias gco='git checkout'
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
-alias gl='git pull'
+#alias gl='git pull'
+alias grm='git rm'
+alias rmc='git rm --cached'
 alias gp='git push'
 alias gr='git remote'
 alias gra='git remote add'
@@ -37,4 +39,8 @@ alias grbm='git rebase master'
 alias grbs='git rebase --skip'
 alias gst='git status'
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
+# Check status of all tools managed by mise
+alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise ls --current --missing"
 
+# Quick mise health diagnostic
+alias mdoctor="mise doctor"
