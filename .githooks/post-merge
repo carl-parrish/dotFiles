@@ -1,10 +1,13 @@
 # ~/dotfiles/.githooks/post-merge
-#!/usr/bin/env fish
+# #!/usr/bin/env fish
 
 # Automatically install new tools when dotfiles are updated
 if type -q mise
-    echo "Changes detected. Running 'mise install'..."
+    echo "🔧 dotFiles detected: Syncing hooks and mise tools..."
+    # 1. Ensure the hooks are fresh
+    mise run setup-hooks
+    # 2. Install any new versions/tools from config.toml
     mise install
 else
-    echo "Warning: mise not found. Skipping auto-install."
+    echo "⚠️ Warning: mise not found. Skipping auto-install."
 end
