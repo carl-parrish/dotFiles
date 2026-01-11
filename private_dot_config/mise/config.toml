@@ -1,0 +1,41 @@
+[tools]
+# --- Core Languages ---
+go = "1.25.4"
+node = "20"
+python = "3.12"
+ruby = "3.3"
+rust = "latest"
+
+# --- Node Packages ---
+"npm:@infisical/cli" = "latest"
+"npm:@bitwarden/cli" = "latest"
+"npm:pnpm" = "latest"
+"npm:typescript" = "latest"
+
+# --- Cargo/Rust Tools (Compiled) ---
+"cargo:spec-kit-mcp" = "latest"
+"cargo:eza" = "latest"
+"cargo:ripgrep" = "latest"
+
+# --- Universal Binaries (Fast Install) ---
+"ubi:atuinsh/atuin" = "latest"     # Moved here for consistency
+"ubi:sharkdp/bat" = "latest"
+"ubi:ajeetdsouza/zoxide" = "latest"
+"ubi:bcicen/ctop" = "latest"
+"ubi:cjbassi/gotop" = "latest"
+"ubi:junegunn/fzf" = "latest"
+"ubi:starship/starship" = "latest"
+"ubi:zellij-org/zellij" = "latest"
+"ubi:sharkdp/fd" = "latest"
+"ubi:lsd-rs/lsd" = "latest"
+"ubi:ducaale/xh" = "latest"
+
+[tasks.setup-hooks]
+description = "Link .githooks to git config for auto-updates"
+dir = "~/dotFiles"
+run = [
+  "git config core.hooksPath .githooks",
+  "chmod +x .githooks/post-merge",
+  "echo '✅ Git hooks wired up! Next git pull will trigger auto-installs.'"
+]
+

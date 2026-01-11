@@ -1,0 +1,47 @@
+alias ll='ls -l'
+alias la='ls -a'
+alias jjl=' jj |  less'
+alias nv='nvim'
+alias h='atuin search'
+alias bcat='bat -p --paging=never'
+alias bn='bat --style="numbers,header"'
+alias dl='lsd'
+alias ez='/usr/bin/eza --icons'
+alias el='eza -lhg --icons'
+alias ea='eza -lha --sort=type --icons --group-directories-first'
+alias et='eza --tree --level=3 --icons' 
+#Git Aliases
+alias g=git
+alias ga='git add'
+alias gaa='git add --all'
+alias gap='git apply'
+alias gapa='git add --patch'
+alias gc='git commit -v'
+alias gcb='git checkout -b'
+alias gcf='git config --list'
+alias gcm='git checkout main'
+alias gcmsg='git commit -m'
+alias gco='git checkout'
+alias gf='git fetch'
+alias gfa='git fetch --all --prune'
+#alias gl='git pull'
+alias grm='git rm'
+alias rmc='git rm --cached'
+alias gp='git push'
+alias gr='git remote'
+alias gra='git remote add'
+alias grb='git rebase'
+alias grba='git rebase --abort'
+alias grbc='git rebase --continue'
+alias grbd='git rebase develop'
+alias grbi='git rebase -i'
+alias grbm='git rebase master'
+alias grbs='git rebase --skip'
+alias gst='git status'
+alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
+alias ccd="chezmoi cd"
+# Check status of all tools managed by mise
+alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise ls --current --missing"
+
+# Quick mise health diagnostic
+alias mdoctor="mise doctor"

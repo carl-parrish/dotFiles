@@ -1,0 +1,8 @@
+tags
+.luarc.json
+lazy-lock.json
+.stylua.toml
+history.txt
+.DS_Store
+
+spell/

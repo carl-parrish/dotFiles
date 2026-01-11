@@ -1,0 +1,162 @@
+local wezterm = require("wezterm")
+local dimmer = { brightness = 0.1 }
+local config = {}
+config.colors = { foreground = "yellow" }
+config.default_prog = { "/usr/local/bin/fish", "-l" }
+config.default_domain = "nushell_domain" -- Or "fish_domain", as you prefer
+
+config.exec_domains = {
+	wezterm.exec_domain("fish_domain", function(domain_name)
+		-- Fish domain should also ideally have explicit essential env vars if you find it needs them,
+		-- but it often works with defaults more readily. For consistency, you could add them.
+		local parent_path_fish = wezterm.getenv("PATH")
+		local fallback_path_fish = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" -- Standard paths
+		local effective_path_fish = parent_path_fish or fallback_path_fish
+
+		return {
+			args = { "/usr/local/bin/fish", "-l" },
+			label = "Fish Domain",
+			gui_config_overrides = {
+				background = {
+					{
+						source = { File = "/Users/cparrish817/.config/wezterm/images/d3Logo.png" },
+						attachment = "Fixed",
+						width = "100%",
+						height = "Contain",
+						hsb = dimmer,
+						opacity = 1,
+						horizontal_align = "Center",
+						vertical_align = "Middle",
+						repeat_x = "NoRepeat",
+						repeat_y = "NoRepeat",
+					},
+				},
+			},
+			set_environment_variables = { -- Explicit environment for Fish
+				PATH = effective_path_fish,
+				HOME = wezterm.home_dir,
+				USER = wezterm.effective_user_name,
+				SHELL = "/usr/local/bin/fish",
+			},
+		}
+	end),
+
+	wezterm.exec_domain("nushell_domain", function(domain_name)
+		local parent_path = wezterm.getenv("PATH")
+		-- Corrected typo: wezterm.getenv, not wezter.getenv
+		wezterm.log_info("Nushell domain factory: PATH from wezterm.getenv('PATH') is: " .. tostring(parent_path))
+
+		-- Define a sensible fallback PATH for your system
+		local fallback_path = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+		if wezterm.target_triple_os == "Windows" then
+			fallback_path = wezterm.getenv("SystemRoot") .. "\\System32;" .. wezterm.getenv("SystemRoot") .. ";"
+		end
+
+		local effective_path = parent_path
+		if parent_path == nil or parent_path == "" then
+			-- Corrected typo: wezterm.log_warn, not log_war
+			wezterm.log_warn("Nushell domain factory: wezterm.getenv('PATH') was nil or empty. Using fallback PATH.")
+			effective_path = fallback_path
+		end
+
+		return {
+			args = { "/usr/local/bin/nu", "-l" }, -- Ensure this path is correct
+			label = "Nushell Domain",
+			gui_config_overrides = {
+				background = {
+					{
+						source = { File = "/Users/cparrish817/.config/wezterm/images/nuLogo.png" },
+						attachment = "Fixed",
+						width = "100%",
+						height = "Contain",
+						hsb = dimmer,
+						opacity = 1,
+						horizontal_align = "Center",
+						vertical_align = "Middle",
+						repeat_x = "NoRepeat",
+						repeat_y = "NoRepeat",
+					},
+					{
+						source = { Gradient = { preset = "Viridis" } },
+						height = "100%",
+						width = "100%",
+						opacity = 0.4,
+					},
+				},
+			},
+			-- VVV THIS IS THE CORRECT PLACE FOR set_environment_variables VVV
+			set_environment_variables = {
+				PATH = effective_path,
+				HOME = wezterm.home_dir, -- Gets user's home directory
+				USER = wezterm.effective_user_name, -- Gets effective username
+				SHELL = "/usr/local/bin/nu", -- Set the SHELL variable
+				-- Add any other environment variables Nushell might need
+			},
+			-- ^^^ THIS IS THE CORRECT PLACE FOR set_environment_variables ^^^
+		}
+	end),
+}
+
+-- This function should now ONLY handle GUI overrides like background.
+local function set_background_for_domain(window, pane)
+	local domain_name = pane:get_domain_name()
+	local overrides = {}
+
+	if domain_name == "fish_domain" then
+		overrides.background = {
+			{
+				source = { File = "/Users/cparrish817/.config/wezterm/images/d3Logo.png" },
+				attachment = "Fixed",
+				width = "100%",
+				height = "Contain",
+				hsb = dimmer,
+				opacity = 1,
+				horizontal_align = "Center",
+				vertical_align = "Middle",
+				repeat_x = "NoRepeat",
+				repeat_y = "NoRepeat",
+			},
+		}
+	elseif domain_name == "nushell_domain" then
+		overrides.background = {
+			{
+				source = { File = "/Users/cparrish817/.config/wezterm/images/nuLogo.png" },
+				attachment = "Fixed",
+				width = "100%",
+				height = "Contain",
+				hsb = dimmer,
+				opacity = 1,
+				horizontal_align = "Center",
+				vertical_align = "Middle",
+				repeat_x = "NoRepeat",
+				repeat_y = "NoRepeat",
+			},
+			{
+				source = { Gradient = { preset = "Viridis" } },
+				height = "100%",
+				width = "100%",
+				opacity = 0.4,
+			},
+		}
+		-- REMOVED set_environment_variables from here, as it was incorrect
+	end
+
+	if next(overrides) ~= nil then
+		window:set_config_overrides(overrides)
+	end
+end
+
+wezterm.on(
+	"format-tab-title",
+	function(tab, tabs, panes, config_arg, hover, max_width) -- Renamed 'config' to 'config_arg' to avoid conflict with global config
+		if tab.active_pane then
+			local title = tab.active_pane.domain_name
+			set_background_for_domain(tab.active_pane:window(), tab.active_pane)
+			return { { text = title } }
+		else
+			return { { text = "wezterm" } } -- Corrected typo "wezter" to "wezterm"
+		end
+	end
+)
+
+return config

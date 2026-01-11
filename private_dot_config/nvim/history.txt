@@ -1,0 +1,242 @@
+pico ~/.config/fish/config.fish
+which pico
+vi ~/.config/fish/config.fish
+vim ~/.config/fish/config.fish
+h neovim
+h > history.txt
+history
+ls ~/.local/bin
+ls
+~/.config/nvim/
+cd nvim/
+ll -h
+ll -h nvim/
+ls ~/dotfiles/nvim/
+cd ~/dotfiles/
+which nv
+ls ~/.local/bin/
+nv 750words_export_2022_03.md
+nv 750
+ls *.md
+sudo dpkg -i appimagelauncher_2.2.0-travis995.0f91801.bionic_amd64.deb
+ls *.deb
+cd ~/Downloads/
+sudo apt install appimagelauncher
+sudo apt upgrade
+apt list --upgradable
+sudo apt update
+sudo add-apt-repository ppa:appimagelauncher-team/stable
+ping -c 4 launchpad.net
+sudo apt install software-properties-common
+which appimagelauncher
+sudo apt-cache policy appimagelauncher
+sudo apt install ubuntu-restricted-extras
+sudo apt install --reinstall mint-meta-codecs
+sudo apt autoremove
+sudo apt install logseq
+sudo apt list --upgradable
+htop
+nv ~/.xprofile
+nv ~/.config/nvim/init.lua
+setxkbmap -option caps:escape
+cat /etc/os-release
+bat /etc/os-release
+sudo apt install bat
+nv
+ls ~/.ssh/
+cat ide_layout.kdl
+sftp cparrish817@m2-mini
+sftp cparrish817@mm2-mini
+fd zellij
+ls zellij*
+cd
+ssh cparrish817@m2-mini
+sudo dpkg -i google-chrome-stable_current_amd64.deb
+sudo dpkg -i google-chrome-stable_current_amd64.deb -f
+dpkg -i google-chrome-stable_current_amd64.deb -f
+dpkg google-chrome-stable_current_amd64.deb
+wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+ping m2-mini
+cat /etc/hosts
+exit
+ls -la
+gitleaks
+gitleaks nvim/
+geekleaks nvim/
+cp gitleaks ~/.local/bin/
+cd bin
+ls ~/.local/
+cd ~/workspace/gitleaks/
+pwd
+make build
+sudo apt install golang --fix-missing
+sudo apt install go --fix-missing
+cd gitleaks/
+git clone https://github.com/gitleaks/gitleaks.git
+mkdir workspace
+cd ~/.config/
+stow nvim
+mv nvim ~/dotfiles/nvim/.config/
+mkdir .config
+cd nvim
+mkdir nvim
+jj describe -m "feat: init neovim config"
+jj describe --reset-author --no-edit
+jj config set --user user.email "carl.parrish@gmail.com"
+jj config set --user user.name "Carl Parrish"
+jj new
+jj status
+cargo install dysk --locked
+h cargo
+nv init.lua
+cd tmp
+mkdir tmp
+mdkri tmp
+cd .fonts/
+fd fonts
+cd ~/.comfig
+rm -rf ':-/'
+cd cparrish/
+cd home/
+cd ':-/'
+cd :=:-/
+rm -rf :=:-/
+nvim --version
+which nvim
+echo $PATH
+chmod u+x nvim
+mv nvim-linux-x86_64.appimage ~/.local/bin/nvim
+mv ~/nvim-linux-x86_64.appimage ~/.local/bin/nvim
+sha256sum nvim-linux-x86_64.appimage
+mv nvim-linux-x86_64\(1\).appimage nvim-linux-x86_64.appimage
+xh --output nvim-linux-x86_64.appimage "https://objects.githubusercontent.com/github-production-release-asset-2e65be/16408992/67441ef6-dbb2-4341-ba59-6d050d16b06c?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=releaseassetproduction%2F20250520%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250520T165855Z&X-Amz-Expires=300&X-Amz-Signature=ccbd789cb87a24c80c0ec63ffab6d28ffc53b3c97e7101f8edba81c032c77f08&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3Dnvim-linux-x86_64.appimage&response-content-type=application%2Foctet-stream"
+sudo dpkg -i neovim_0.10.4-8_amd64.deb
+sudo apt install -f
+sudo dpkg -i neovim_0.10.4-8_amd64.deb
+sudo apt install -f
+sha256sum neovim_0.10.4-8_amd64.deb
+ll -h nvim-linux-x86_64.appimage
+cargo install xh --locked
+sudo apt install xh --fix-missing
+cd Downloads/
+sqlite3 ~/.local/share/atuin/history.db
+atuin search .local/bin/
+sudo apt install sqlite3
+cargo install atuin --version 19.0.0 --locked
+cargo install atuin --locked
+which rustup
+which cargo
+cargo --version
+atuin --version
+atuin login
+curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | bash
+xh -s https://setup.atuin.sh | bash
+bash <(curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh)
+atuin search --help
+atuin --help search
+atuin search --time "2025-05-20 10:03:50" --context 4
+ssh -T git@github.com
+nv --version
+nv .gitignore
+la
+cd ~/.config/nvim/
+git clone git@github.com:carl-parrish/kickstart.nvim.git "$HOME/.config"/nvim
+git clone git@github.com:carl-parrish/kickstart.nvim.git "$XDG_CONFIG_HOME:-$HOME/.config"/nvim
+rm -rf ~/.config/nvim/
+la ~/.config/nvim/
+ls ~/.config/nvim/
+atuin init fish | source
+history | grep atuin
+h git
+ssh-copy-id -i ~/.ssh/id_ed25519.pub cparrish817@m2-mini
+ssh-keygen -t ed25519 -C "cparrish@mint-mini"
+cd ~/.ssh/
+which ssh-copy-id
+sudo apt install ssh-copy-id
+ssh m2-mini
+sudo nvim /etc/hosts
+sudo nv /etc/hosts
+sudo apt install remmina
+git clone https://github.com/nvim-lua/kickstart.nvim.git "$XDG_CONFIG_HOME:-$HOME/.config"/nvim
+echo $XDG_CONFIG_HOME
+sudo apt install fonts-noto-color-emoji
+atuin sync
+atuin update
+atuin import auto
+sudo apt-get install mint-meta-codecs
+sudo shutdown -r now
+sudo apt install libmp3lame-dev libopus-dev libssl-dev --fix-missing
+sudo apt install libx264-dev libx265-dev libnuma-dev libvpx-dev libfdk-aac-dev --fix-missing
+sudo apt install lib264-dev libx265-dev libnuma-dev libvpx-dev libfdk-aac-dev --fix-missing
+nv admin.txt
+cd notes
+mkdir notes
+sudo apt install htop
+sudo apt-get install -f
+nv common.fish
+nvim common.fish
+cd aliases/
+nvim config.fish
+nv config.fish
+cd ~/.config/fish/
+vim config.fish
+touch common.fish
+mkdir aliases
+chsh
+cd dotfiles
+mkdir dotfiles
+fd --version
+which fd
+ln -s $(which fdfind) ~/.local/bin/fd
+mkdir ~/.local/bin
+ls ~/.local
+mkdir ~/.local
+mdir ~/.local
+which fdfind
+sudo apt install fd-find --fix-missing
+sudo apt install git --fix-missing
+sudo apt install neovim --fix-missing
+sudo apt install nvim --fix-missing
+sudo apt --fix-broken install
+sudo apt install fd-utiles --fix-missing
+sudo apt install rustc
+sudo yum install rustc
+sudo apt install rust
+sudo apt install rg
+sudo apt instal rg
+sudo yum install rg
+sudo apt install golang
+sudo apt install go
+sudo apt install fdupes
+sudo apt install nushell
+sudo apt install nu
+sudo apt install fish
+ls ~/.config/
+chsh -s /usr/bin/fish
+nvim /etc/shells
+which fish
+cd fish/
+nvim
+jj --version
+cargo install --locked --bin jj jj-cli
+sudo apt install libssl-doc
+sudo apt-get install libssl-dev openssl pkg-config build-essential
+. $HOME/.cargo/env
+sudo curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -v
+sudo curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -v~
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -v~
+sudo apt install jj
+which fd-find
+source ~/.bashrc
+which rg
+sudo dpkg -i ripgrep_14.1.0-1_amd64.deb
+curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep_14.1.0-1_amd64.deb
+which atuin
+cksh
+sudo apt install sh
+curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh~
+mkdir ~/.fonts
+fish
+sudo apt install wezterm jj go zillij tmux fish nushell
+sudo apt-get install chrome
+jj git init

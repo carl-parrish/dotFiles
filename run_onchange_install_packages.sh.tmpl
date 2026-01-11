@@ -1,0 +1,26 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+
+# --- CachyOS / Arch ---
+{{   if eq .chezmoi.osRelease.id "cachyos" "arch" -}}
+echo "📦 Installing Arch packages..."
+# Standard Repos
+sudo pacman -Syu --noconfirm w3m aerc
+
+# AUR / Cachy Repos
+# (Note: Requires 'paru' to be installed. CachyOS has it by default.)
+paru -S --noconfirm dlauncher
+{{   end -}}
+
+# Bluefin / Fedora
+{{   if eq .chezmoi.osRelease.id "fedora" -}}
+sudo dnf install -y w3m aerc
+{{   end -}}
+
+# Debian / Ubuntu / Mint
+{{   if eq .chezmoi.osRelease.id "debian" "ubuntu" "linuxmint" -}}
+sudo apt install -y w3m aerc
+{{   end -}}
+
+
+{{ end -}}

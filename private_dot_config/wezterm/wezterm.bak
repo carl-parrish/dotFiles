@@ -1,0 +1,144 @@
+local wezterm = require("wezterm")
+local dimmer = { brightness = 0.1 }
+local config = {}
+config.colors = { foreground = "yellow" }
+config.default_prog = { "/usr/local/bin/fish", "-l" }
+config.default_domain = "nushell_domain"
+config.exec_domains = {
+	wezterm.exec_domain("fish_domain", function(domain_name)
+		return {
+			args = { "/usr/local/bin/fish", "-l" },
+			label = "Fish Domain",
+			gui_config_overrides = {
+				background = {
+					{
+						source = {
+							File = "/Users/cparrish817/.config/wezterm/images/d3Logo.png", -- Replace with your Fish image path
+						},
+						attachment = "Fixed",
+						width = "100%",
+						height = "Contain",
+						hsb = dimmer,
+						opacity = 1,
+						horizontal_align = "Center",
+						vertical_align = "Middle",
+						repeat_x = "NoRepeat",
+						repeat_y = "NoRepeat",
+					},
+					-- Any other background layers you want for Fish
+				},
+			},
+		}
+	end),
+	wezterm.exec_domain("nushell_domain", function(domain_name)
+		local parent_path = wezterm.getenv("PATH")
+		wezterm.log_info("Nushell domain factory: PATH from wezter.getenv('PATH') is: " .. tostring(parent_path))
+		local fallback_path = "/usr/local/bin:/usr/bin:/usr/sbin:/sbin"
+
+		local effective_path = parent_path
+		if parent_path == nil or parent_path == "" then
+			wezterm.log_war("Nushell domain factory: wezterm.getenv('PATH') was nil or empty. Using fallback PATH.")
+			effective_path = fallback_path
+		end
+
+		return {
+			args = { "/usr/local/bin/nu", "-l" },
+			label = "Nushell Domain",
+			gui_config_overrides = {
+				background = {
+					{
+						source = {
+							File = "/Users/cparrish817/.config/wezterm/images/nuLogo.png",
+						},
+						attachment = "Fixed",
+						width = "100%",
+						height = "Contain",
+						hsb = dimmer,
+						opacity = 1,
+						horizontal_align = "Center",
+						vertical_align = "Middle",
+						repeat_x = "NoRepeat",
+						repeat_y = "NoRepeat",
+					},
+					{
+						source = { Gradient = { preset = "Viridis" } },
+						height = "100%",
+						width = "100%",
+						opacity = 0.4,
+					},
+				},
+			},
+		}
+	end),
+}
+
+local function set_background_for_domain(window, pane)
+	local domain_name = pane:get_domain_name()
+	local overrides = {}
+
+	if domain_name == "fish_domain" then
+		overrides.background = {
+			{
+				source = {
+					File = "/Users/cparrish817/.config/wezterm/images/d3Logo.png", -- Replace with your Fish image path
+				},
+				attachment = "Fixed",
+				width = "100%",
+				height = "Contain",
+				hsb = dimmer,
+				opacity = 1,
+				horizontal_align = "Center",
+				vertical_align = "Middle",
+				repeat_x = "NoRepeat",
+				repeat_y = "NoRepeat",
+				-- Your other background layer settings for Fish
+			},
+			-- Any other background layers you want for Fish
+		}
+	elseif domain_name == "nushell_domain" then
+		overrides.background = {
+			{
+				source = {
+					File = "/Users/cparrish817/.config/wezterm/images/nuLogo.png",
+				},
+				attachment = "Fixed",
+				width = "100%",
+				height = "Contain",
+				hsb = dimmer,
+				opacity = 1,
+				horizontal_align = "Center",
+				vertical_align = "Middle",
+				repeat_x = "NoRepeat",
+				repeat_y = "NoRepeat",
+			},
+			{
+				source = { Gradient = { preset = "Viridis" } },
+				height = "100%",
+				width = "100%",
+				opacity = 0.4,
+			},
+		}
+		set_environment_variables = {
+			PATH = effective_path,
+			HOME = wezterm.home_dir,
+			USER = wezterm.effective_user_name,
+			SHELL = "/usr/local/bin/nu",
+		}
+	end
+
+	if next(overrides) ~= nil then -- Check if the overrides table is not empty
+		window:set_config_overrides(overrides)
+	end
+end
+
+wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_width)
+	if tab.active_pane then
+		local title = tab.active_pane.domain_name
+		set_background_for_domain(tab.active_pane:window(), tab.active_pane)
+		return { { text = title } }
+	else
+		return { { text = "wezter" } }
+	end
+end)
+
+return config
