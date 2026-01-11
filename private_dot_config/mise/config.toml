@@ -13,6 +13,7 @@ rust = "latest"
 "npm:typescript" = "latest"
 
 # --- Cargo/Rust Tools (Compiled) ---
+# Keeping 'cargo' to ensure ARM64 compatibility on Linux/Pi
 "cargo:spec-kit-mcp" = "latest"
 "cargo:eza" = "latest"
 "cargo:ripgrep" = "latest"
@@ -28,14 +29,9 @@ rust = "latest"
 "ubi:sharkdp/fd" = "latest"
 "ubi:lsd-rs/lsd" = "latest"
 "ubi:ducaale/xh" = "latest"
+
+# Aqua Provider (Fixed)
 atuin = "latest"
 
-[tasks.setup-hooks]
-description = "Link .githooks to git config for auto-updates"
-dir = "~/dotFiles"
-run = [
-  "git config core.hooksPath .githooks",
-  "chmod +x .githooks/post-merge",
-  "echo '✅ Git hooks wired up! Next git pull will trigger auto-installs.'"
-]
-
+# --- Tasks ---
+# (Deleted obsolete setup-hooks)
