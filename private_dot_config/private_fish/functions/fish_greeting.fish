@@ -20,6 +20,6 @@ function fish_greeting
 
     echo -e "\n"
     set_color cyan; echo "─── Wisdom for $device ───"
-    set_color italics; set_color white; echo "$chosen_quote"
+    set_color --italics; set_color white; echo "$chosen_quote"
     set_color normal; echo -e "\n"
 end
