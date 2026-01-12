@@ -37,12 +37,12 @@ sudo tailscale up
 - Option A: Public Repo
 
 ```Bash
-sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin init --apply [https://github.com/carl-parrish/dotFiles](https://github.com/carl-parrish/dotFiles)
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin init --apply https://github.com/carl-parrish/dotFiles
 ```
 - Option B: Tailnet Repo (Private)
 ```Bash
 
-sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin init --apply [https://git.deeplydigital.net/cparrish/dotFiles](https://git.deeplydigital.net/cparrish/dotFiles)
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin init --apply https://git.deeplydigital.net/cparrish/dotFiles
 ```
 ### 5. Finalize Setup
 Reload the shell to pick up Mise paths and configs:
