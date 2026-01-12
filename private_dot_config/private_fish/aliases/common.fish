@@ -17,8 +17,16 @@ alias ea='eza -lha --sort=type --icons --group-directories-first'
 alias et='eza --tree --level=3 --icons'
 
 # --- Chezmoi ---
+# 'chezmoi cd' opens a subshell, so using alias here to distinguish it
 alias ccd="chezmoi cd"
-abbr cu 'chezmoi update'
+
+# Abbreviations (Expand on Space/Enter)
+abbr -a cu    'chezmoi update'
+abbr -a ca    'chezmoi apply'
+abbr -a cga   'chezmoi git add'
+abbr -a cgp   'chezmoi git push'
+abbr -a ce    'chezmoi edit --apply'
+abbr -a cdiff 'chezmoi diff'
 
 # --- Mise ---
 alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise ls --current --missing"
