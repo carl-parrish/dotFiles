@@ -27,7 +27,7 @@ sudo pacman -Syu --noconfirm git curl fish neovim gcc base-devel
 ```
 ### 3. Install & Authenticate Tailscale
 ```bash
-curl -fsSL [https://tailscale.com/install.sh](https://tailscale.com/install.sh) | sh
+curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up
 ```
 ### 4. Install Chezmoi & Apply Dotfiles
