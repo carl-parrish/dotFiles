@@ -13,9 +13,12 @@ Managed with [chezmoi](https://www.chezmoi.io/).
     ```bash
     sudo pacman -Syu --noconfirm fish
     ```
-* **Set as default:**
+* **Ensure fish is in /etc/shells and change default shell**
     ```bash
-    chsh -s /usr/bin/fish
+if ! grep -q "$(which fish)" /etc/shells; then
+  echo "$(which fish)" | sudo tee -a /etc/shells
+fi
+chsh -s "$(which fish)"
     ```
 
 ### 2. Install Basics
