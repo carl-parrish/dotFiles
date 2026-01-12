@@ -15,10 +15,10 @@ Managed with [chezmoi](https://www.chezmoi.io/).
     ```
 * **Ensure fish is in /etc/shells and change default shell**
     ```bash
-if ! grep -q "$(which fish)" /etc/shells; then
-  echo "$(which fish)" | sudo tee -a /etc/shells
-fi
-chsh -s "$(which fish)"
+    if ! grep -q "$(which fish)" /etc/shells; then
+      echo "$(which fish)" | sudo tee -a /etc/shells
+    fi
+    chsh -s "$(which fish)"
     ```
 
 ### 2. Install Basics
