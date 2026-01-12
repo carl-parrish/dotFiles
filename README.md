@@ -57,3 +57,14 @@ atuin login
 ```Bash
 infisical login
 ```
+
+### 7. ⌨️ Dotfile Workflow
+The following Fish abbreviations are included to manage your configuration efficiently:
+
+- ce [file] — Edit & Apply: Opens a config file in your editor and applies changes immediately upon saving.
+- ca — Apply: Manually apply pending changes from the source directory to your home folder.
+- cdiff — Diff: Preview changes before applying them.
+- cu — Update: Pull the latest changes from the remote repository.
+- ccd — Source CD: Jump directly into the chezmoi source directory.
+- cgst / cgcmsg / cgp — Git Ops: Status, commit, and push changes specifically for the dotfile repository.
+
