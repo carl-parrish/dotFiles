@@ -89,7 +89,7 @@ Pop = ""
 
 [git_branch]
 symbol = ""
-style = "bg:color_agua"
+style = "bg:color_aqua"
 format = '[on](white) [[ $symbol $branch ](fg:color_fg0 bg:color_aqua)]($style)'
 
 [git_status]
@@ -139,7 +139,7 @@ format = '[$duration]($style)'
 
 [custom.jj]
 command = '''starship-jj --ignore-working-copy starship prompt'''
-style = "bg:color_agua"
+style = "bg:color_aqua"
 format = "[$symbol $bookmark](fg:color_fg0 bg:color_agua)($style) "
 symbol = ""
 when = "jj root --ignore-working-copy"
