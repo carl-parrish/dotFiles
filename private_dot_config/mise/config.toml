@@ -11,6 +11,7 @@ rust = "latest"
 "npm:@bitwarden/cli" = "latest"
 "npm:pnpm" = "latest"
 "npm:typescript" = "latest"
+"npm:@google/gemini-cli" = "latest"
 
 # --- Cargo/Rust Tools (Compiled) ---
 # Keeping 'cargo' to ensure ARM64 compatibility on Linux/Pi
