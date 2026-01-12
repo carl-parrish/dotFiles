@@ -28,6 +28,10 @@ abbr -a cgp   'chezmoi git push'
 abbr -a cgl   'chezmoi git pull'
 abbr -a ce    'chezmoi edit --apply'
 abbr -a cdiff 'chezmoi diff'
+abbr -a cgap  'chezmoi git -- add --patch'
+abbr -a cgst  'chezmoi git status'
+abbr -a cgc   'chezmoi git commit'
+abbr -a cgcmsg 'chezmoi git commit -m'
 
 # --- Mise ---
 alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise ls --current --missing"
