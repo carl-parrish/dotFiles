@@ -31,7 +31,7 @@ abbr -a cdiff 'chezmoi diff'
 abbr -a cgap  'chezmoi git -- add --patch'
 abbr -a cgst  'chezmoi git status'
 abbr -a cgc   'chezmoi git commit'
-abbr -a cgcmsg 'chezmoi git commit -m'
+abbr -a cgcmsg 'chezmoi git -- commit -m'
 
 # --- Mise ---
 alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise ls --current --missing"
@@ -68,6 +68,15 @@ abbr -a grbi 'git rebase -i'
 abbr -a grbm 'git rebase main'
 abbr -a grbs 'git rebase --skip'
 
+# --- Kubernetes / Homelab ---
+abbr -a k     'kubectl'
+abbr -a kg    'kubectl get'
+abbr -a kgp   'kubectl get pods'
+abbr -a kgn   'kubectl get nodes -o wide'  # Use this a lot to check Tailscale IPs [cite: 690]
+abbr -a kd    'kubectl describe'
+abbr -a klogs 'kubectl logs -f'
+abbr -a kx    'kubectx'                    # Quick switch between contexts (Local vs Prod)
+abbr -a kn    'kubens'                     # Quick switch namespaces (default vs homelab)
 
 # Complex Git Aliases (Keep as Alias because they contain logic/pipes )
-alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
+alias gwip='git add -A; git rm (git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
