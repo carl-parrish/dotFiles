@@ -8,7 +8,7 @@ rust = "latest"
 
 # --- Node Packages ---
 "npm:@infisical/cli" = "latest"
-"npm:@bitwarden/cli" = "latest"
+
 "npm:pnpm" = "latest"
 "npm:typescript" = "latest"
 "npm:@google/gemini-cli" = "latest"
@@ -33,6 +33,8 @@ rust = "latest"
 
 # Aqua Provider (Fixed)
 atuin = "latest"
+bitwarden = "latest"
+infisical = "latest"
 
 # --- Tasks ---
 # (Deleted obsolete setup-hooks)
