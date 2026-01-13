@@ -1,0 +1,87 @@
+runtime:
+  confirm_before_exec: true
+GOOSE_MODEL: gemini-2.0-flash
+GOOSE_PROVIDER: google
+llm:
+# 🔐 Pulls key from Infisical (setup via 'infisical init')
+  api_key:{{ (output "infisical" "run" "--" "printenv" "GEMINI_API_KEY" | trim) }} 
+  model: gemini-2.0-flash
+  provider: google
+extensions:
+  developer:
+    enabled: true
+    type: builtin
+    name: developer
+    description: Code editing, shell access and reading notes in ~/notes
+    display_name: Developer Tools
+    timeout: 300
+    bundled: true
+    available_tools: []
+  todo:
+    enabled: false
+    type: platform
+    name: todo
+    description: Enable a todo list for Goose so it can keep track of what it is doing
+    bundled: true
+    available_tools: []
+  extensionmanager:
+    enabled: true
+    type: platform
+    name: Extension Manager
+    description: Enable extension management tools for discovering, enabling, and disabling extensions
+    bundled: true
+    available_tools: []
+  chatrecall:
+    enabled: true
+    type: platform
+    name: chatrecall
+    description: Search past conversations and load session summaries for contextual memory
+    bundled: true
+    available_tools: []
+  tutorial:
+    enabled: false
+    type: builtin
+    name: tutorial
+    description: Access interactive tutorials and guides
+    display_name: Tutorial
+    timeout: 300
+    bundled: true
+    available_tools: []
+  specify:
+    enabled: true
+    type: stdio
+    name: specify
+    description: Local project/spec orchestration
+    cmd: specify
+    args: []
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  cognee:
+    enabled: true
+    type: streamable_http
+    name: Cognee
+    description: Central Cognee knowledge graph memory (homelab, shared across devices)
+    uri: https://cognee.cuttlefish-gorgon.ts.net/mcp
+    envs: {}
+    env_keys: []
+    headers:
+      Accept: application/json, text/event-stream
+    timeout: 300
+    bundled: null
+    available_tools: []
+  speckit:
+    enabled: true
+    type: stdio
+    name: speckit
+    description: Planning agent
+    cmd: spec-kit-mcp
+    args: []
+    envs:
+      PATH: "/Users/cparrish817/.local/bin:/usr/local/bin:/usr/bin:/bin"
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
