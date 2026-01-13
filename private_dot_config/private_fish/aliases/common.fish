@@ -32,6 +32,7 @@ abbr -a cgap  'chezmoi git -- add --patch'
 abbr -a cgst  'chezmoi git status'
 abbr -a cgc   'chezmoi git commit'
 abbr -a cgcmsg 'chezmoi git -- commit -m'
+abbr -a cct 'chezmoi chattr +template'
 
 # --- Mise ---
 alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise ls --current --missing"
