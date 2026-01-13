@@ -84,3 +84,13 @@ abbr -a kn    'kubens'                     # Quick switch namespaces (default vs
 
 # Complex Git Aliases (Keep as Alias because they contain logic/pipes )
 alias gwip='git add -A; git rm (git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
+# --- Infisical (The Keymaster) ---
+abbr -a ir   'infisical run --env dev --'
+abbr -a irp  'infisical run --env prod --'
+abbr -a is   'infisical secrets'
+abbr -a iss  'infisical secrets set'
+
+# --- The Brain ---
+abbr -a cdn  'cd ~/notes'
+abbr -a gn   'grep -rni . ~/notes -e' 
+abbr -a goo  'goose'
