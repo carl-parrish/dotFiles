@@ -37,6 +37,9 @@ abbr -a cgcmsg 'chezmoi git -- commit -m'
 alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise ls --current --missing"
 alias mdoctor="mise doctor"
 
+abbr -a mug 'mise use -g'
+abbr -a mlg 'mise ls --global'
+
 # --- Git (Converted to Abbreviations for better history) ---
 abbr -a g    'git'
 abbr -a ga   'git add'
