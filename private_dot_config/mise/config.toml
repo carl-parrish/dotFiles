@@ -7,8 +7,6 @@ ruby = "3.3"
 rust = "latest"
 
 # --- Node Packages ---
-"npm:@infisical/cli" = "latest"
-
 "npm:pnpm" = "latest"
 "npm:typescript" = "latest"
 "npm:@google/gemini-cli" = "latest"
@@ -31,8 +29,9 @@ rust = "latest"
 "ubi:lsd-rs/lsd" = "latest"
 "ubi:ducaale/xh" = "latest"
 
-# Aqua Provider (Fixed)
+# Stand alone Providers
 atuin = "latest"
+
 bitwarden = "latest"
 infisical = "latest"
 
