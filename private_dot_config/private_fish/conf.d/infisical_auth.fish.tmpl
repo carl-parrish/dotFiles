@@ -1,0 +1,12 @@
+{{- if (and .infisical .infisical.clientId) -}}
+# Infisical Machine Identity
+set -gx INFISICAL_CLIENT_ID "{{ .infisical.clientId }}"
+set -gx INFISICAL_CLIENT_SECRET "{{ .infisical.clientSecret }}"
+
+# Force the Local Bin (Wrapper) to the front of the PATH
+# The --move flag is key: it outmaneuvers Mise's activation hook
+fish_add_path --prepend --move ~/.local/bin
+
+# Force the local URL to bypass Hairpin NAT
+set -gx INFISICAL_API_URL "http://127.0.0.1:8081"
+{{- end -}}
