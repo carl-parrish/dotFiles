@@ -29,6 +29,10 @@ rust = "latest"
 "ubi:lsd-rs/lsd" = "latest"
 "ubi:ducaale/xh" = "latest"
 
+# --- GitHub Binaries ---
+"github:ActivityWatch/activitywatch" = "latest"
+
+
 # Stand alone Providers
 atuin = "latest"
 
