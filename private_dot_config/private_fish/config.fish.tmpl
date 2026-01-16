@@ -76,6 +76,7 @@ if status is-interactive
     # 1. Initialize mise
     if type -q mise
         mise activate fish --shims | source
+        fish_add_path --move --prepend $HOME/.local/bin
     end
 
     # 2. Initialize Atuin (Fixed: Use 'command' to bypass aliases)
