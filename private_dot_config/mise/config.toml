@@ -32,6 +32,9 @@ rust = "latest"
 # --- GitHub Binaries ---
 "github:ActivityWatch/activitywatch" = "latest"
 
+# --- macOS Specific Tools ---
+"brew:FelixKratz/formulae/borders" = { version = "latest", os = ["macos"] }
+
 
 # Stand alone Providers
 atuin = "latest"

@@ -24,7 +24,17 @@ end
 set -gx MISE_DATA_DIR $HOME/.local/share/mise
 set -gx MISE_CONFIG_DIR $HOME/.config/mise
 set -gx MISE_CACHE_DIR $HOME/.cache/mise
+
+# Start JankyBorders if available and not running
+if type -q borders
+    if not pgrep -x "borders" > /dev/null
+        # Customize these colors/width as you prefer
+        borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=5.0 &
+    end
+end
+
 {{- end }}
+
 
 # =========================
 # PATH setup
