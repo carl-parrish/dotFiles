@@ -2,96 +2,97 @@ local wezterm = require("wezterm")
 local dimmer = { brightness = 0.1 }
 local config = {}
 
-config.colors = { foreground = "yellow" }
-config.default_prog = { "arch", "-arm64", "/opt/homebrew/bin/fish", "-l" }
-config.default_domain = "fish_domain"
-config.term = "wezterm"
+-- =========================================================
+-- 1. OS & PATH DETECTION
+-- =========================================================
+local is_mac = wezterm.target_triple:find("darwin")
+local is_linux = wezterm.target_triple:find("linux")
 
--- Helper function to get PATH robustly
-local function get_effective_path()
-	local path_value
-	local source_log = ""
+-- Dynamic Home Directory
+local home_dir = os.getenv("HOME") or wezterm.home_dir
 
-	if type(os.getenv) == "function" then
-		path_value = os.getenv("PATH")
-		source_log = "os.getenv('PATH')"
-		wezterm.log_info("Path from " .. source_log .. ": " .. tostring(path_value))
-	end
+-- Define Shell Paths based on OS
+local fish_bin
+local nu_bin
 
-	if (path_value == nil or path_value == "") and (wezterm and type(wezterm.getenv) == "function") then
-		path_value = wezterm.getenv("PATH")
-		source_log = "wezterm.getenv('PATH')"
-		wezterm.log_info("Path from " .. source_log .. ": " .. tostring(path_value))
-	elseif path_value == nil or path_value == "" then
-		wezterm.log_warn(
-			"wezterm.getenv is not a function or wezterm module is not as expected. Type: "
-				.. type(wezterm and wezterm.getenv)
-		)
-	end
+if is_mac then
+	-- macOS Paths (Apple Silicon)
+	fish_bin = "/opt/homebrew/bin/fish"
+	nu_bin = "/opt/homebrew/bin/nu"
 
-	local fallback_path = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" -- Adjust if needed for macOS specifics
-	if wezterm and wezterm.target_triple_os == "Windows" then
-		fallback_path = wezterm.getenv("SystemRoot") .. "\\System32;" .. wezterm.getenv("SystemRoot") .. ";" -- Simplified Windows fallback
-	end
+	-- Launch Command
+	config.default_prog = { "arch", "-arm64", fish_bin, "-l" }
+elseif is_linux then
+	-- Linux Paths (Mint)
+	fish_bin = "/usr/bin/fish" -- Standard apt install location
+	nu_bin = home_dir .. "/.cargo/bin/nu" -- Your cargo install location
 
-	if path_value == nil or path_value == "" then
-		wezterm.log_warn(
-			"PATH was nil or empty from available getenv methods. Using hardcoded fallback: "
-				.. fallback_path
-				.. ". (Source of attempt: "
-				.. source_log
-				.. ")"
-		)
-		return fallback_path
-	else
-		return path_value
-	end
+	-- Launch Command
+	config.default_prog = { fish_bin, "-l" }
 end
 
+config.default_domain = "fish_domain"
+config.term = "wezterm"
+config.colors = { foreground = "yellow" }
+
+-- =========================================================
+-- 2. HELPER FUNCTIONS
+-- =========================================================
+local function get_effective_path()
+	local path_value
+	if type(os.getenv) == "function" then
+		path_value = os.getenv("PATH")
+	end
+
+	-- Fallback for safety
+	if not path_value or path_value == "" then
+		if is_windows then
+			path_value = wezterm.getenv("SystemRoot") .. "\\System32"
+		else
+			path_value = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+		end
+	end
+	return path_value
+end
+
+local function get_image_path(filename)
+	-- Dynamically builds path: $HOME/.config/wezterm/images/filename
+	return home_dir .. "/.config/wezterm/images/" .. filename
+end
+
+-- =========================================================
+-- 3. DOMAINS
+-- =========================================================
 config.exec_domains = {
 	wezterm.exec_domain("fish_domain", function(domain_name)
-		local effective_path_fish = get_effective_path() -- Use helper
+		local effective_path = get_effective_path()
 		return {
-			args = { "/opt/homebrew/bin/fish", "-l" },
+			-- Use the variable we defined at the top
+			args = { fish_bin, "-l" },
 			label = "Fish Domain",
 			gui_config_overrides = {
 				colors = { background = "navy" },
-				--background = {
-				--{
-				--source = { File = "/Users/cparrish817/.config/wezterm/images/d3Logo.png" },
-				--attachment = "Fixed",
-				--width = "100%",
-				--height = "Contain",
-				--hsb = dimmer,
-				--opacity = 1,
-				--horizontal_align = "Center",
-				--vertical_align = "Middle",
-				--repeat_x = "NoRepeat",
-				--repeat_y = "NoRepeat",
-				--},
-				--	},
 			},
 			set_environment_variables = {
-				PATH = effective_path_fish,
-				HOME = wezterm.home_dir,
+				PATH = effective_path,
+				HOME = home_dir,
 				USER = wezterm.effective_user_name,
-				SHELL = "/opt/homebrew/bin/fish",
+				SHELL = fish_bin, -- Uses dynamic path
 				TERM = "wezterm",
 			},
 		}
 	end),
 
 	wezterm.exec_domain("nushell_domain", function(domain_name)
-		local effective_path_nushell = get_effective_path() -- Use helper
-		wezterm.log_info("Nushell domain factory: effective_path determined as: " .. tostring(effective_path_nushell))
-
+		local effective_path = get_effective_path()
 		return {
-			args = { "/usr/local/bin/nu", "-l" },
+			args = { nu_bin, "-l" }, -- Uses dynamic path
 			label = "Nushell Domain",
 			gui_config_overrides = {
 				background = {
 					{
-						source = { File = "/Users/cparrish817/.config/wezterm/images/nuLogo.png" },
+						-- Uses dynamic home dir
+						source = { File = get_image_path("nuLogo.png") },
 						attachment = "Fixed",
 						width = "100%",
 						height = "Contain",
@@ -111,32 +112,27 @@ config.exec_domains = {
 				},
 			},
 			set_environment_variables = {
-				PATH = effective_path_nushell,
-				HOME = wezterm.home_dir,
+				PATH = effective_path,
+				HOME = home_dir,
 				USER = wezterm.effective_user_name,
-				SHELL = "/usr/local/bin/nu",
+				SHELL = nu_bin,
 			},
 		}
 	end),
 }
 
--- Your set_background_for_domain function (ensure dimmer is in scope if used here, it is globally)
+-- =========================================================
+-- 4. EVENT HANDLERS
+-- =========================================================
 local function set_background_for_domain(window, pane)
 	local domain_name = pane:get_domain_name()
-	wezterm.log_info(
-		"set_background_for_domain CALLED. Domian: "
-			.. tostring(domain_name)
-			.. ", PaneID: "
-			.. tostring(pane:pane_id())
-	)
 	local overrides = {}
-	local background_definition_to_apply
+	local background_definition
 
 	if domain_name == "fish_domain" then
-		wezterm.log_info("Preparing fish_domain background override")
-		background_definition_to_apply = {
+		background_definition = {
 			{
-				source = { File = "/Users/cparrish817/.config/wezterm/images/d3Logo.png" },
+				source = { File = get_image_path("d3Logo.png") },
 				attachment = "Fixed",
 				width = "100%",
 				height = "Contain",
@@ -149,9 +145,9 @@ local function set_background_for_domain(window, pane)
 			},
 		}
 	elseif domain_name == "nushell_domain" then
-		overrides.background = {
+		background_definition = {
 			{
-				source = { File = "/Users/cparrish817/.config/wezterm/images/nuLogo.png" },
+				source = { File = get_image_path("nuLogo.png") },
 				attachment = "Fixed",
 				width = "100%",
 				height = "Contain",
@@ -171,46 +167,16 @@ local function set_background_for_domain(window, pane)
 		}
 	end
 
-	if background_definition_to_apply then
-		overrides.background = background_definition_to_apply
-
-		local success, encoded_json = pcall(wezterm.json_encode, overrides)
-		if success then
-			wezterm.log_info("Applying overrides for " .. tostring(domain_name) .. ": " .. encoded_json)
-		else
-			wezterm.log_info(
-				"Failed to json_encode overrides for " .. tostring(domain_name) .. ". Error: " .. tostring(encoded_json)
-			)
-			if
-				overrides.background
-				and overrides.background[1]
-				and overrides.background[1].source
-				and overrides.background[1].source.File
-			then
-				wezterm.log_info(
-					"Fallback Log - Source File for first layer: " .. tostring(overrides.background[1].source.File)
-				)
-			else
-				wezterm.log_info(
-					"Fallback Log - Overrides tables has an unexpected structure or is missing expected File path."
-				)
-			end
-		end
-
+	if background_definition then
+		overrides.background = background_definition
 		window:set_config_overrides(overrides)
-		wezterm.log_info("window:set_config_overrides() called for " .. tostring(domain_name))
-	else
-		wezterm.log_info(
-			"No specific background override defined in set_background_for_domain for domain: " .. tostring(domain_name)
-		)
 	end
 end
 
 wezterm.on("format-tab-title", function(tab, tabs, panes, config_arg, hover, max_width)
 	if tab.active_pane then
-		local title = tab.active_pane.domain_name
 		set_background_for_domain(tab.active_pane:window(), tab.active_pane)
-		return { { text = title } }
+		return { { text = tab.active_pane.domain_name } }
 	else
 		return { { text = "wezterm" } }
 	end
