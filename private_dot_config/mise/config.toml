@@ -28,12 +28,10 @@ rust = "latest"
 "ubi:sharkdp/fd" = "latest"
 "ubi:lsd-rs/lsd" = "latest"
 "ubi:ducaale/xh" = "latest"
+"ubi:a8m/envsubst" = "latest"
 
 # --- GitHub Binaries ---
 "github:ActivityWatch/activitywatch" = "latest"
-
-# --- macOS Specific Tools ---
-"brew:FelixKratz/formulae/borders" = { version = "latest", os = ["macos"] }
 
 
 # Stand alone Providers
