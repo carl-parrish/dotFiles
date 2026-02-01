@@ -34,6 +34,12 @@ abbr -a cgc   'chezmoi git commit'
 abbr -a cgcmsg 'chezmoi git -- commit -m'
 abbr -a cct 'chezmoi chattr +template'
 
+# Faster fd for dotfile hunting
+abbr -a fa  'fd -HIp'      # Find All (Hidden, Ignored, absolute Path)
+abbr -a fhd 'fd -H'        # Find Hidden
+abbr -a fpd 'fd -p'        # Find Path
+abbr -a fxd 'fd -H -x'     # Find Hidden and Execute (e.g. fxd aerospace.toml cat)
+
 # --- Mise ---
 alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise ls --current --missing"
 alias mdoctor="mise doctor"
