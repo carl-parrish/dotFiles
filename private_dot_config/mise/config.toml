@@ -33,6 +33,7 @@ rust = "latest"
 
 # --- GitHub Binaries ---
 "github:ActivityWatch/activitywatch" = "latest"
+"github:kopia/kopia" = "latest"
 
 # --- macOS Specific Tools ---
 #"brew:FelixKratz/formulae/borders" = { version = "latest", os = ["macos"] }
@@ -41,7 +42,6 @@ rust = "latest"
 atuin = "latest"
 
 infisical = "latest"
-kopia = "latest"
 sops = "latest"
 age = "latest"
 
