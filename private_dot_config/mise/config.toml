@@ -39,7 +39,7 @@ rust = "latest"
 # Stand alone Providers
 atuin = "latest"
 
-bitwarden = "latest"
+"npm:@bitwarden/cli" = "latest"
 infisical = "latest"
 kopia = "latest"
 
