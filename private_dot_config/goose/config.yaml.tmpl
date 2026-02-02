@@ -4,7 +4,7 @@ GOOSE_MODEL: gemini-2.0-flash
 GOOSE_PROVIDER: google
 llm:
 # 🔐 Pulls key from Infisical (setup via 'infisical init')
-  api_key:{{ (output "infisical" "run" "--" "printenv" "GEMINI_API_KEY" | trim) }} 
+  api_key: {{ output "infisical" "run" "--projectId" .infisical.projectId "--" "printenv" "GEMINI_API_KEY" | trim }}
   model: gemini-2.0-flash
   provider: google
 extensions:

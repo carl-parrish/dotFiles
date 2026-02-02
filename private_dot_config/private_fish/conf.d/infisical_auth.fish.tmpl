@@ -9,7 +9,7 @@
 {{- end }}
 
 # 2. Universal Project ID
-set -gx INFISICAL_PROJECT_ID "8ae0704f-ad44-4984-bbeb-64b61faa46b5"
+set -gx INFISICAL_PROJECT_ID "{{ .infisical.projectId }}"
 
 # 3. Conditional API URL
 # Raspberry Pi uses local loopback to bypass Hairpin NAT
