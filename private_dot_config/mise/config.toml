@@ -10,6 +10,7 @@ rust = "latest"
 "npm:pnpm" = "latest"
 "npm:typescript" = "latest"
 "npm:@google/gemini-cli" = "latest"
+"npm:@bitwarden/cli" = "latest"
 
 # --- Cargo/Rust Tools (Compiled) ---
 # Keeping 'cargo' to ensure ARM64 compatibility on Linux/Pi
@@ -39,9 +40,10 @@ rust = "latest"
 # Stand alone Providers
 atuin = "latest"
 
-"npm:@bitwarden/cli" = "latest"
 infisical = "latest"
 kopia = "latest"
+sops = "latest"
+age = "latest"
 
 # --- Tasks ---
 # (Deleted obsolete setup-hooks)

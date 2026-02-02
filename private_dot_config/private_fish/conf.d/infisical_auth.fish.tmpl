@@ -21,9 +21,11 @@ set -gx INFISICAL_API_URL "https://secrets.cuttlefish-gorgon.ts.net"
 {{- end }}
 
 # 4. Load the secrets into the environment
-if type -q infisical
-    # Now GITHUB_TOKEN and others are available to Mise/Forgejo/Goose
-    infisical export --format=unix | source
+# ONLY do this in interactive shells to avoid breaking SSH/AntiGravity/Automation
+if status is-interactive
+    if type -q infisical
+        infisical export --format=unix | source
+    end
 end
 
 # 5. Path Management
