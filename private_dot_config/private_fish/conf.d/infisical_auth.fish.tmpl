@@ -24,7 +24,7 @@ set -gx INFISICAL_API_URL "https://secrets.cuttlefish-gorgon.ts.net"
 # ONLY do this in interactive shells to avoid breaking SSH/AntiGravity/Automation
 if status is-interactive
     if type -q infisical
-        infisical export --format=unix | source
+        infisical export --format=dotenv-export | source
     end
 end
 
