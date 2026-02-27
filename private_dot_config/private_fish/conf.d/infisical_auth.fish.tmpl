@@ -1,32 +1,33 @@
 # ~/.config/fish/conf.d/infisical_auth.fish.tmpl
 
-# 1. Machine Identity (Raspberry Pi Only)
-{{- if eq .chezmoi.hostname "raspberrypi" }}
-  {{- if (and .infisical .infisical.clientId) }}
-  set -gx INFISICAL_CLIENT_ID "{{ .infisical.clientId }}"
-  set -gx INFISICAL_CLIENT_SECRET "{{ .infisical.clientSecret }}"
-  {{- end }}
-{{- end }}
+# 1. Standard Machine Identity Guard
+{{- $is_pi := eq .hostname "raspberrypi" }}
 
 # 2. Universal Project ID
 set -gx INFISICAL_PROJECT_ID "{{ .infisical.projectId }}"
+set -gx INFISICAL_DISABLE_KEYRING true
 
 # 3. Conditional API URL
-# Raspberry Pi uses local loopback to bypass Hairpin NAT
-{{- if eq .chezmoi.hostname "raspberrypi" }}
+{{- if $is_pi }}
+# Bypass Hairpin NAT on the Pi
 set -gx INFISICAL_API_URL "http://127.0.0.1:8081"
 {{- else }}
-# Mac-mini, mint-mini, and all others use the Tailnet address
+# Use the Tailnet address for all other nodes
 set -gx INFISICAL_API_URL "https://secrets.cuttlefish-gorgon.ts.net"
 {{- end }}
 
-# 4. Load the secrets into the environment
-# ONLY do this in interactive shells to avoid breaking SSH/AntiGravity/Automation
+# 4. Machine Identity Authentication (Pi Only)
+{{- if $is_pi }}
 if status is-interactive
-    if type -q infisical
-        infisical export --format=dotenv-export | source
+    if not set -q INFISICAL_TOKEN
+        set -gx INFISICAL_TOKEN (infisical login --method=universal-auth \
+            --client-id="{{ .infisical.clientId }}" \
+            --client-secret="{{ .infisical.clientSecret }}" \
+            --plain --silent)
     end
 end
 
 # 5. Path Management
 fish_add_path --prepend --move ~/.local/bin
+
+{{- end }}

@@ -1,3 +1,6 @@
+{{- /* 1. Force a real system hostname check */ -}}
+{{- $realHostname := output "hostname" | trim -}}
+
 {{- $clientId := "" -}}
 {{- $clientSecret := "" -}}
 {{- if (and (hasKey . "infisical") (hasKey .infisical "clientId")) -}}
@@ -7,7 +10,8 @@
 {{-   $clientSecret = .infisical.clientSecret -}}
 {{- end -}}
 
-{{- if or (eq .chezmoi.hostname "raspberrypi") (eq .chezmoi.hostname "secrets") }}
+{{- /* 2. Use the real hostname for the prompt guard */ -}}
+{{- if eq $realHostname "raspberrypi" }}
 {{-   if not $clientId -}}
 {{-     $clientId = promptString "Infisical Client ID" -}}
 {{-   end -}}
@@ -16,9 +20,12 @@
 {{-   end -}}
 {{- end }}
 
+[data]
+    hostname = {{ $realHostname | quote }}
+
 [data.infisical]
     projectId = "8ae0704f-ad44-4984-bbeb-64b61faa46b5"
-{{- if or (eq .chezmoi.hostname "raspberrypi") (eq .chezmoi.hostname "secrets") }}
+{{- if eq $realHostname "raspberrypi" }}
     clientId = {{ $clientId | quote }}
     clientSecret = {{ $clientSecret | quote }}
 {{- end }}
