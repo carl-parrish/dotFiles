@@ -34,6 +34,7 @@ rust = "latest"
 # --- GitHub Binaries ---
 "github:ActivityWatch/activitywatch" = "latest"
 "github:kopia/kopia" = "latest"
+"github:str4d/age-plugin-yubikey" = "latest"
 
 # --- macOS Specific Tools ---
 #"brew:FelixKratz/formulae/borders" = { version = "latest", os = ["macos"] }
@@ -44,6 +45,7 @@ atuin = "latest"
 infisical = "latest"
 sops = "latest"
 age = "latest"
+rclone = "1.73.1"
 
 # --- Tasks ---
 # (Deleted obsolete setup-hooks)
