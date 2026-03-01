@@ -95,6 +95,7 @@ abbr -a ir   'infisical run --env dev --'
 abbr -a irp  'infisical run --env prod --'
 abbr -a is   'infisical secrets'
 abbr -a iss  'infisical secrets set'
+abbr -a ir-psql 'infisical run --env dev -- sh -c "PGPASSWORD=\$POSTGRES_PASSWORD psql -U admin -h pgsql"'
 
 # --- The Brain ---
 abbr -a cdn  'cd ~/notes'
