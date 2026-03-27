@@ -17,6 +17,8 @@ rust = "latest"
 "cargo:spec-kit-mcp" = "latest"
 "cargo:eza" = "latest"
 "cargo:ripgrep" = "latest"
+"cargo:nu" = "latest"
+"cargo:jj-cli" = "latest"
 
 # --- Universal Binaries (Fast Install) ---
 "ubi:sharkdp/bat" = "latest"
@@ -41,11 +43,11 @@ rust = "latest"
 
 # Stand alone Providers
 atuin = "latest"
-
 infisical = "latest"
 sops = "latest"
 age = "latest"
 rclone = "1.73.1"
+gh = "latest"
 
 # --- Tasks ---
 # (Deleted obsolete setup-hooks)
