@@ -69,10 +69,6 @@ if test -f ~/.config/fish/aliases/common.fish
     source ~/.config/fish/aliases/common.fish
 end
 
-# =========================
-# Vi key bindings
-# =========================
-fish_vi_key_bindings
 
 # =========================
 # Secrets (Infisical Placeholder)
@@ -87,37 +83,43 @@ if status is-interactive
     # Set TTY for GPG pinentry prompts
     set -x GPG_TTY (tty)
 
-    # 1. Initialize mise
-    if type -q mise
-        mise activate fish --shims | source
-        fish_add_path --move --prepend $HOME/.local/bin
-    end
-
-    # 2. Initialize Atuin (Fixed: Use 'command' to bypass aliases)
+    # 1. Initialize Atuin
     if type -q atuin
         command atuin init fish | source
     end
 
-    # 3. Starship
+    # 2. Starship
     if type -q starship
         starship init fish | source
     end
 
-# 4. Zoxide
+    # 3. Zoxide (Loop-Proof)
     if type -q zoxide
         zoxide init fish | source
-        
         function cd
             if test (count $argv) -eq 0
                 builtin cd $HOME
             else
-                # Try to jump with zoxide, but if it fails (or it's just a path), 
-                # use the actual builtin cd.
                 z $argv 2>/dev/null; or builtin cd $argv
             end
         end
     end
+
+# =========================
+# Vi key bindings
+# =========================
+fish_vi_key_bindings
+    
+
+    # 4. Initialize mise (LAST = HIGHEST PRIORITY)
+    # By putting this last, mise shims will be at the very front 
+    # of your path, overriding manual binaries in .local/bin.
+    if type -q mise
+        # We use --shims only to keep the shell fast
+        mise activate fish --shims | source
+    end
 end
+
 
 # =========================
 # Machine-Specific Tweaks
