@@ -1,3 +1,8 @@
+{{- $is_chromebook := false -}}
+{{- if (and (eq .chezmoi.os "linux") (contains "penguin" .chezmoi.hostname)) -}}
+  {{- $is_chromebook = true -}}
+{{- end -}}
+
 local wezterm = require("wezterm")
 local dimmer = { brightness = 0.1 }
 local config = wezterm.config_builder()
@@ -5,20 +10,24 @@ local config = wezterm.config_builder()
 -- =========================================================
 -- 1. GLOBAL & OS-SPECIFIC SETUP
 -- =========================================================
+{{ if $is_chromebook -}}
+-- Chromebook/Crostini Stability Fixes
+config.enable_wayland = false
+config.front_end = 'OpenGL'
+{{ end -}}
+
 {{ if eq .chezmoi.os "darwin" -}}
+config.front_end = 'WebGpu'
 local fish_bin = "/opt/homebrew/bin/fish"
-local nu_bin = "/opt/homebrew/bin/nu"
 config.default_prog = { "arch", "-arm64", fish_bin, "-l" }
 {{ else -}}
 local fish_bin = "/usr/bin/fish"
--- Using the mise path for nu since we just compiled it!
 local nu_bin = "{{ .chezmoi.homeDir }}/.local/share/mise/shims/nu"
 config.default_prog = { fish_bin, "-l" }
 {{ end -}}
 
 local home_dir = "{{ .chezmoi.homeDir }}"
 
--- Remove default_domain for now to ensure a clean launch
 config.term = "wezterm"
 config.colors = { foreground = "yellow" }
 
@@ -49,26 +58,27 @@ local function update_status_and_background(window, pane)
     local overrides = {}
     local background_definition
     
-    -- Background logic based on process name (Simpler than Domains)
-    local process = pane:get_foreground_process_name()
+    -- 1. Get the process name safely
+    local success, process = pcall(function() return pane:get_foreground_process_name() end)
     
-    if process:find("fish") then
-        overrides.colors = { background = "navy" }
-        background_definition = {
-            {
-                source = { File = get_image_path("d3Logo.png") },
-                attachment = "Fixed", width = "100%", height = "Contain",
-                hsb = dimmer, opacity = 1, horizontal_align = "Center", vertical_align = "Middle",
-                repeat_x = "NoRepeat", repeat_y = "NoRepeat",
-            },
-        }
+    -- 2. Guard against nil (startup race condition)
+    if success and process then
+        if process:find("fish") then
+            overrides.colors = { background = "black" }
+            background_definition = {
+                {
+                    source = { File = get_image_path("d3Logo.png") },
+                    attachment = "Fixed", width = "100%", height = "Contain",
+                    hsb = dimmer, opacity = 1, horizontal_align = "Center", vertical_align = "Middle",
+                    repeat_x = "NoRepeat", repeat_y = "NoRepeat",
+                },
+            }
+        end
     end
-
     if background_definition then
         overrides.background = background_definition
-    end
-    
-    window:set_config_overrides(overrides)
+        window:set_config_overrides(overrides)
+    end 
 
     -- ActivityWatch Heartbeat
     pcall(function()
