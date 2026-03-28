@@ -3,23 +3,22 @@ local dimmer = { brightness = 0.1 }
 local config = wezterm.config_builder()
 
 -- =========================================================
--- 1. GLOBAL & OS-SPECIFIC SETUP (Via Chezmoi)
+-- 1. GLOBAL & OS-SPECIFIC SETUP
 -- =========================================================
 {{ if eq .chezmoi.os "darwin" -}}
--- macOS Paths (Apple Silicon)
 local fish_bin = "/opt/homebrew/bin/fish"
 local nu_bin = "/opt/homebrew/bin/nu"
 config.default_prog = { "arch", "-arm64", fish_bin, "-l" }
 {{ else -}}
--- Linux Paths (Chromebook/Mint/Pi)
 local fish_bin = "/usr/bin/fish"
-local nu_bin = "{{ .chezmoi.homeDir }}/.cargo/bin/nu"
+-- Using the mise path for nu since we just compiled it!
+local nu_bin = "{{ .chezmoi.homeDir }}/.local/share/mise/shims/nu"
 config.default_prog = { fish_bin, "-l" }
 {{ end -}}
 
 local home_dir = "{{ .chezmoi.homeDir }}"
 
-config.default_domain = "fish_domain"
+-- Remove default_domain for now to ensure a clean launch
 config.term = "wezterm"
 config.colors = { foreground = "yellow" }
 
@@ -27,45 +26,34 @@ config.colors = { foreground = "yellow" }
 -- 2. HELPER FUNCTIONS
 -- =========================================================
 local function get_image_path(filename)
-	return home_dir .. "/.config/wezterm/images/" .. filename
+    return home_dir .. "/.config/wezterm/images/" .. filename
 end
 
 -- =========================================================
--- 3. DOMAINS
+-- 3. KEYBINDINGS (The CMD+T Nushell Tab)
 -- =========================================================
-config.exec_domains = {
-	wezterm.exec_domain("fish_domain", function(domain_name)
-		return {
-			args = { fish_bin, "-l" },
-			label = "Fish Domain",
-			set_environment_variables = {
-				SHELL = fish_bin,
-				TERM = "wezterm",
-			},
-		}
-	end),
-
-	wezterm.exec_domain("nushell_domain", function(domain_name)
-		return {
-			args = { nu_bin, "-l" },
-			label = "Nushell Domain",
-			set_environment_variables = {
-				SHELL = nu_bin,
-			},
-		}
-	end),
+config.keys = {
+  {
+    key = 't',
+    mods = 'CMD', -- Or CTRL|SHIFT for Linux preference
+    action = wezterm.action.SpawnCommandInNewTab {
+      args = { nu_bin, "-l" },
+    },
+  },
 }
+
 -- =========================================================
 -- 4. ACTIVITYWATCH & BACKGROUNDS
 -- =========================================================
 local function update_status_and_background(window, pane)
-    local domain_name = pane:get_domain_name()
     local overrides = {}
     local background_definition
-
-    -- A. Handle Background Images & Colors
-    if domain_name == "fish_domain" then
-        overrides.colors = { background = "navy" } -- Moved from Section 3 to here
+    
+    -- Background logic based on process name (Simpler than Domains)
+    local process = pane:get_foreground_process_name()
+    
+    if process:find("fish") then
+        overrides.colors = { background = "navy" }
         background_definition = {
             {
                 source = { File = get_image_path("d3Logo.png") },
@@ -74,43 +62,25 @@ local function update_status_and_background(window, pane)
                 repeat_x = "NoRepeat", repeat_y = "NoRepeat",
             },
         }
-    elseif domain_name == "nushell_domain" then
-        background_definition = {
-            {
-                source = { File = get_image_path("nuLogo.png") },
-                attachment = "Fixed", width = "100%", height = "Contain",
-                hsb = dimmer, opacity = 1, horizontal_align = "Center", vertical_align = "Middle",
-                repeat_x = "NoRepeat", repeat_y = "NoRepeat",
-            },
-            {
-                source = { Gradient = { preset = "Viridis" } },
-                height = "100%", width = "100%", opacity = 0.4,
-            },
-        }
     end
 
     if background_definition then
         overrides.background = background_definition
-        window:set_config_overrides(overrides)
     end
+    
+    window:set_config_overrides(overrides)
 
-    -- B. ActivityWatch Heartbeat (xh + jj)
-    -- Using 'pcall' so WezTerm doesn't crash if mise isn't ready
+    -- ActivityWatch Heartbeat
     pcall(function()
         local _, xh_path, _ = wezterm.run_child_process({ 'mise', 'which', 'xh' })
         xh_path = xh_path:gsub("%s+", "")
 
         if xh_path ~= "" then
-            local cwd = pane:get_current_working_dir()
-            local path = cwd and cwd.file_path or ""
-
             wezterm.background_run_child_process({
                 xh_path, '--ignore-stdin', '--quiet', 'POST', 
                 'https://aw.sourcecodesamurai.com/api/0/buckets/aw-watcher-wezterm/heartbeat?pulsetime=30',
                 'timestamp=' .. os.date('!%Y-%m-%dT%H:%M:%SZ'),
                 'duration=0',
-                'data[label]=' .. domain_name,
-                'data[cwd]=' .. path,
                 'data[title]=' .. window:active_tab():get_title()
             })
         end
