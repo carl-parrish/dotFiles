@@ -10,27 +10,33 @@ local config = wezterm.config_builder()
 -- =========================================================
 -- 1. GLOBAL & OS-SPECIFIC SETUP
 -- =========================================================
+local home_dir = "{{ .chezmoi.homeDir }}"
+
+-- Define paths globally so they are never 'nil'
+local fish_bin = "/usr/bin/fish"
+local nu_bin = home_dir .. "/.local/share/mise/shims/nu"
+
+{{ if eq .chezmoi.os "darwin" -}}
+-- Mac Specifics
+fish_bin = "/opt/homebrew/bin/fish"
+config.front_end = 'WebGpu'
+config.default_prog = { "arch", "-arm64", fish_bin, "-l" }
+{{ else -}}
+-- Linux/Chromebook Specifics
+config.default_prog = { fish_bin, "-l" }
+{{ end -}}
+
 {{ if $is_chromebook -}}
 -- Chromebook/Crostini Stability Fixes
 config.enable_wayland = false
 config.front_end = 'OpenGL'
 {{ end -}}
 
-{{ if eq .chezmoi.os "darwin" -}}
-config.front_end = 'WebGpu'
-local fish_bin = "/opt/homebrew/bin/fish"
-config.default_prog = { "arch", "-arm64", fish_bin, "-l" }
-{{ else -}}
-local fish_bin = "/usr/bin/fish"
-local nu_bin = "{{ .chezmoi.homeDir }}/.local/share/mise/shims/nu"
-config.default_prog = { fish_bin, "-l" }
-{{ end -}}
-
-local home_dir = "{{ .chezmoi.homeDir }}"
-
 config.term = "wezterm"
-config.colors = { foreground = "yellow" }
-
+config.colors = { 
+    foreground = "yellow", 
+    background = "black"
+}
 -- =========================================================
 -- 2. HELPER FUNCTIONS
 -- =========================================================
@@ -44,8 +50,9 @@ end
 config.keys = {
   {
     key = 't',
-    mods = 'CMD', -- Or CTRL|SHIFT for Linux preference
+    mods = 'CMD', 
     action = wezterm.action.SpawnCommandInNewTab {
+      -- nu_bin is now guaranteed to be a string, avoiding the 'Object to Vec' error
       args = { nu_bin, "-l" },
     },
   },
@@ -57,42 +64,49 @@ config.keys = {
 local function update_status_and_background(window, pane)
     local overrides = {}
     local background_definition
-    
-    -- 1. Get the process name safely
+
     local success, process = pcall(function() return pane:get_foreground_process_name() end)
-    
-    -- 2. Guard against nil (startup race condition)
+
     if success and process then
         if process:find("fish") then
             overrides.colors = { background = "black" }
             background_definition = {
-                {
-                    source = { File = get_image_path("d3Logo.png") },
-                    attachment = "Fixed", width = "100%", height = "Contain",
-                    hsb = dimmer, opacity = 1, horizontal_align = "Center", vertical_align = "Middle",
-                    repeat_x = "NoRepeat", repeat_y = "NoRepeat",
-                },
-            }
-        end
+            -- Layer 1: Solid Black Base
+            {
+                source = { Color = "black" },
+                width = "100%",
+                height = "100%",
+                opacity = 1.0,
+            },
+            -- Layer 2: Logo
+            {
+                source = { File = get_image_path("DeeplyDigitalDesign_text.png") },
+                attachment = "Fixed", width = "100%", height = "Contain",
+                hsb = dimmer, opacity = 1, horizontal_align = "Center", vertical_align = "Middle",
+                repeat_x = "NoRepeat", repeat_y = "NoRepeat",
+            },
+        }
     end
+end
     if background_definition then
         overrides.background = background_definition
         window:set_config_overrides(overrides)
-    end 
+    end
 
     -- ActivityWatch Heartbeat
     pcall(function()
         local _, xh_path, _ = wezterm.run_child_process({ 'mise', 'which', 'xh' })
-        xh_path = xh_path:gsub("%s+", "")
-
-        if xh_path ~= "" then
-            wezterm.background_run_child_process({
-                xh_path, '--ignore-stdin', '--quiet', 'POST', 
-                'https://aw.sourcecodesamurai.com/api/0/buckets/aw-watcher-wezterm/heartbeat?pulsetime=30',
-                'timestamp=' .. os.date('!%Y-%m-%dT%H:%M:%SZ'),
-                'duration=0',
-                'data[title]=' .. window:active_tab():get_title()
-            })
+        if xh_path then
+            xh_path = xh_path:gsub("%s+", "")
+            if xh_path ~= "" then
+                wezterm.background_run_child_process({
+                    xh_path, '--ignore-stdin', '--quiet', 'POST',
+                    'https://aw.sourcecodesamurai.com/api/0/buckets/aw-watcher-wezterm/heartbeat?pulsetime=30',
+                    'timestamp=' .. os.date('!%Y-%m-%dT%H:%M:%SZ'),
+                    'duration=0',
+                    'data[title]=' .. window:active_tab():get_title()
+                })
+            end
         end
     end)
 end
