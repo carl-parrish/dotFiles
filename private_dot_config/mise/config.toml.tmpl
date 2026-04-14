@@ -4,7 +4,7 @@ go = "1.25.4"
 node = "20"
 python = "3.12"
 ruby = "3.3"
-rust = "latest"
+rust = "1.92.0"
 
 # --- Kubernetes & CKA Study ---
 # Version locked for exam consistency
@@ -15,6 +15,11 @@ opentofu = "1.7.0"
 # macOS Only: Study & Runtime
 minikube = "1.33.1"
 "aqua:abiosoft/colima" = "latest"
+"github:str4d/age-plugin-yubikey" = "latest"
+
+{{- else }}
+# Compiles on the Banana Pi / Linode
+"cargo:age-plugin-yubikey" = "latest"
 {{- end }}
 
 
@@ -48,9 +53,9 @@ minikube = "1.33.1"
 # --- GitHub Binaries ---
 "github:ActivityWatch/activitywatch" = "latest"
 "github:kopia/kopia" = "latest"
-"github:str4d/age-plugin-yubikey" = "latest"
-"github:cli/cli" = "2.89.0"
 
+# -- Go Packages --
+"go:github.com/cli/cli/v2/cmd/gh" = "latest"
 
 # Stand alone Providers
 atuin = "latest"
@@ -59,5 +64,3 @@ sops = "latest"
 age = "latest"
 rclone = "1.73.1"
 
-[settings]
-autoinstall = true

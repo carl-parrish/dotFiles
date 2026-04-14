@@ -1,0 +1,5 @@
+# Mise Global Settings
+autoinstall = true
+# shims are now enabled by default, but you can be explicit:
+shims = true
+github_attestations = false
