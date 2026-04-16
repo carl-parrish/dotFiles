@@ -29,14 +29,6 @@ set -gx MISE_DATA_DIR $HOME/.local/share/mise
 set -gx MISE_CONFIG_DIR $HOME/.config/mise
 set -gx MISE_CACHE_DIR $HOME/.cache/mise
 
-# Start JankyBorders if available and not running
-if type -q borders
-    if not pgrep -x "borders" > /dev/null
-        # Customize these colors/width as you prefer
-        borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=5.0 &
-    end
-end
-
 {{- end }}
 
 
@@ -58,7 +50,7 @@ end
 
 # Google Cloud
 if test -d "$HOME/google-cloud-sdk/bin/"
-    fish_add_path "$HOME/google-cloud-sdk/bin/"
+    fish_add_path -a "$HOME/google-cloud-sdk/bin/"
 end
 
 
@@ -116,7 +108,7 @@ fish_vi_key_bindings
     # of your path, overriding manual binaries in .local/bin.
     if type -q mise
         # We use --shims only to keep the shell fast
-        mise activate fish --shims | source
+        mise activate fish | source
     end
 end
 
@@ -133,10 +125,11 @@ set -gx STARSHIP_CONFIG $HOME/.config/starship/starship.toml
 # WezTerm background image
 set -gx shellBgImagePath "$HOME/.config/wezterm/images/d3Logo.png"
 
-# If in WezTerm, send user-var (fix WEZTERM_PANE name & var usage)
 if set -q WEZTERM_PANE
-    wezterm cli set-user-var --pane-id $WEZTERM_PANE shellBgImagePath "$shellBgImagePath"
+    # Ensure the command is formatted correctly for modern WezTerm CLI
+    wezterm cli set-user-var shellBgImagePath "$shellBgImagePath" > /dev/null 2>&1
 end
+
 {{- end }}
 
 {{- /* Raspberry Pi Specifics */}}

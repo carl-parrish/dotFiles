@@ -9,6 +9,7 @@ alias h='atuin search'
 alias bcat='bat -p --paging=never'
 alias bn='bat --style="numbers,header"'
 alias dl='lsd'
+alias hs3="aws --profile garage --endpoint-url https://s3.cuttlefish-gorgon.ts.net s3"
 
 # --- EZA short cuts ---
 alias ez='eza --icons'
