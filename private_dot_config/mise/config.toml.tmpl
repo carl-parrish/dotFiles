@@ -19,8 +19,9 @@ minikube = "1.33.1"
 "github:str4d/age-plugin-yubikey" = "latest"
 
 {{- else }}
-# Compiles on the Banana Pi / Linode
+# Compiles on the Pi / Linode
 "cargo:age-plugin-yubikey" = "latest"
+"github:aristocratos/btop" = "latest"
 {{- end }}
 
 
@@ -39,21 +40,21 @@ minikube = "1.33.1"
 "cargo:jj-cli" = "latest"
 
 # --- Universal Binaries (Fast Install) ---
-"ubi:sharkdp/bat" = "latest"
-"ubi:ajeetdsouza/zoxide" = "latest"
-"ubi:bcicen/ctop" = "latest"
-"ubi:cjbassi/gotop" = "latest"
-"ubi:junegunn/fzf" = "latest"
-"ubi:starship/starship" = "latest"
-"ubi:zellij-org/zellij" = "latest"
-"ubi:sharkdp/fd" = "latest"
-"ubi:lsd-rs/lsd" = "latest"
-"ubi:ducaale/xh" = "latest"
-"ubi:a8m/envsubst" = "latest"
-
 # --- GitHub Binaries ---
 "github:ActivityWatch/activitywatch" = "latest"
 "github:kopia/kopia" = "latest"
+"github:astral-sh/ruff" = "latest"
+"github:sharkdp/bat" = "latest"
+"github:ajeetdsouza/zoxide" = "latest"
+"github:junegunn/fzf" = "latest"
+"github:starship/starship" = "latest"
+"github:zellij-org/zellij" = "latest"
+"github:sharkdp/fd" = "latest"
+"github:lsd-rs/lsd" = "latest"
+"github:ducaale/xh" = "latest"
+"github:a8m/envsubst" = "latest"
+"github:ClementTsang/bottom" = "latest"
+"github:jesseduffield/lazydocker" = "latest"
 
 # -- Go Packages --
 "go:github.com/cli/cli/v2/cmd/gh" = "latest"
