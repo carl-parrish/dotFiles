@@ -1,9 +1,8 @@
-{{- $python_path := joinPath .chezmoi.homeDir ".local/share/mise/installs/python/3.12/bin/python" -}}
 -- Check if mise python exists, otherwise fallback to system python
-if vim.fn.executable("{{ $python_path }}") == 1 then
-    vim.g.python3_host_prog = "{{ $python_path }}"
+local _mise_python = vim.fn.trim(vim.fn.system("mise which python"))
+if _mise_python ~= "" then
+    vim.g.python3_host_prog = _mise_python
 end
-vim.g.python3_host_prog = vim.fn.trim(vim.fn.system("mise which python"))
 
 --[[
 
