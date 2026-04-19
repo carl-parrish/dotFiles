@@ -75,17 +75,22 @@ if status is-interactive
     # Set TTY for GPG pinentry prompts
     set -x GPG_TTY (tty)
 
-    # 1. Initialize Atuin
-    if type -q atuin
-        command atuin init fish | source
+    # 1. mise FIRST (so all managed tools are in PATH)
+    if type -q mise
+        mise activate fish | source
     end
 
-    # 2. Starship
+    # 2. Atuin
+    if type -q atuin
+        atuin init fish | source
+    end
+
+    # 3. Starship
     if type -q starship
         starship init fish | source
     end
 
-    # 3. Zoxide (Loop-Proof)
+    # 4. Zoxide
     if type -q zoxide
         zoxide init fish | source
         function cd
@@ -97,21 +102,9 @@ if status is-interactive
         end
     end
 
-# =========================
-# Vi key bindings
-# =========================
-fish_vi_key_bindings
-    
-
-    # 4. Initialize mise (LAST = HIGHEST PRIORITY)
-    # By putting this last, mise shims will be at the very front 
-    # of your path, overriding manual binaries in .local/bin.
-    if type -q mise
-        # We use --shims only to keep the shell fast
-        mise activate fish | source
-    end
+    # 5. Vi key bindings
+    fish_vi_key_bindings
 end
-
 
 # =========================
 # Machine-Specific Tweaks
