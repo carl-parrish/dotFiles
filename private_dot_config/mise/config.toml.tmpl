@@ -31,6 +31,24 @@ minikube = "1.33.1"
 "npm:@google/gemini-cli" = "latest"
 "npm:@bitwarden/cli" = "latest"
 
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.arch "arm64") }}
+# --- Pi / ARM Linux (Compile for safety) ---
+"cargo:zellij" = "latest"
+"cargo:zoxide" = "latest"
+"cargo:lsd" = "latest"
+"cargo:bat" = "latest"
+"cargo:fd-find" = "latest"
+"cargo:starship" = "latest"
+{{- else }}
+# --- Mac / Mint-Mini (Use stable binaries) ---
+"github:zellij-org/zellij" = "latest"
+"github:ajeetdsouza/zoxide" = "latest"
+"github:lsd-rs/lsd" = "latest"
+"github:sharkdp/bat" = "latest"
+"github:sharkdp/fd" = "latest"
+"github:starship/starship" = "latest"
+{{- end }}
+
 # --- Cargo/Rust Tools (Compiled) ---
 # Keeping 'cargo' to ensure ARM64 compatibility on Linux/Pi
 "cargo:spec-kit-mcp" = "latest"
@@ -38,12 +56,6 @@ minikube = "1.33.1"
 "cargo:ripgrep" = "latest"
 "cargo:nu" = "latest"
 "cargo:jj-cli" = "latest"
-"cargo:zoxide" = "latest"
-"cargo:lsd" = "latest"
-"cargo:bat" = "latest"
-"cargo:fd-find" = "latest"
-"cargo:starship" = "latest"
-"cargo:zellij" = "latest"
 
 # --- Universal Binaries (Fast Install) ---
 # --- GitHub Binaries ---
