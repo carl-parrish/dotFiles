@@ -92,11 +92,17 @@ abbr -a kn    'kubens'                     # Quick switch namespaces (default vs
 # Complex Git Aliases (Keep as Alias because they contain logic/pipes )
 alias gwip='git add -A; git rm (git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 # --- Infisical (The Keymaster) ---
+{{- if eq .chezmoi.hostname "raspberrypi" }}
+abbr -a ir   'infisical run --projectId $INFISICAL_PROJECT_ID --env dev --'
+abbr -a irp  'infisical run --projectId $INFISICAL_PROJECT_ID --env prod --'
+{{- else }}
 abbr -a ir   'infisical run --env dev --'
 abbr -a irp  'infisical run --env prod --'
+{{- end }}
 abbr -a is   'infisical secrets'
 abbr -a iss  'infisical secrets set'
 abbr -a ir-psql 'infisical run --env dev -- sh -c "PGPASSWORD=\$POSTGRES_PASSWORD psql -U admin -h pgsql"'
+
 
 # --- The Brain ---
 abbr -a cdn  'cd ~/notes'
