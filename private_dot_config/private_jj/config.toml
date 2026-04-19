@@ -1,0 +1,30 @@
+"$schema" = "https://jj-vcs.github.io/jj/latest/config-schema.json"
+
+[cuser]
+name = "Carl Parrish"
+
+[user]
+email = "cparrish@deeplydigital.net"
+name = "Carl Parrish"
+
+[ui]
+editor = "nvim"
+paginate = "never"
+default-command = "log"
+diff-formatter = ":git"
+
+[git]
+auto-local-bookmark = true
+push-bookmark-prefix = "cparrish/"
+abandon-unreachable-commits = true
+
+[signing]
+behavior = "own"
+
+[aliases]
+l = ["log", "-r", "@ | ancestors()"]
+n = ["new"]
+e = ["edit"]
+d = ["diff"]
+g = ["git", "status"]
+p = ["git", "push"]

@@ -1,0 +1,56 @@
+{{- $os := .chezmoi.os -}}
+{{- $hostname := .chezmoi.hostname -}}
+
+# --- Global defaults ---
+Host *
+  AddKeysToAgent yes
+{{- if eq $os "darwin" }}
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_rsa
+{{- else }}
+  IdentityFile ~/.ssh/id_ed25519
+{{- end }}
+
+# --- macOS only (colima) ---
+{{- if eq $os "darwin" }}
+Include {{ .chezmoi.homeDir }}/.colima/ssh_config
+{{- end }}
+
+# --- Forgejo (The "Golden Path" endpoint) ---
+# Shared homelab key name across all devices as planned
+Host git.deeplydigital.net
+  HostName git.deeplydigital.net
+  User git
+  Port 2222
+  IdentityFile ~/.ssh/keys/active/homelab
+  IdentitiesOnly yes
+
+# --- Local Forgejo (Raspberry Pi Only - Hairpin Fix) ---
+# Only needed on the Pi where the container lives
+{{- if eq $hostname "raspberrypi" }}
+Host localhost
+  HostName localhost
+  User git
+  Port 2222
+  IdentityFile ~/.ssh/keys/active/homelab
+  IdentitiesOnly yes
+{{- end }}
+
+# --- Public Repos (GitHub / GitLab) ---
+Host github.com gitlab.com
+  User git
+  IdentityFile ~/.ssh/keys/active/git_public
+  IdentitiesOnly yes
+
+# --- Tailscale hosts ---
+Host pi
+  HostName pi
+  User cparrish
+
+Host mint-mini
+  HostName mint-mini
+  User cparrish
+
+Host mac-mini
+  HostName mac-mini
+  User cparrish817
