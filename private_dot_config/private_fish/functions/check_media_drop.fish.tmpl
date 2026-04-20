@@ -1,0 +1,70 @@
+function check_media_drop
+    {{ if eq .chezmoi.os "darwin" -}}
+    set drop_root /Volumes/Drop
+    set tv_root /Volumes/TV
+    {{- else -}}
+    set drop_root /mnt/nas/Drop
+    set tv_root /mnt/nas/TV
+    {{- end }}
+
+    # Allow override via args: check_media_drop /custom/drop /custom/tv
+    if test (count $argv) -eq 2
+        set drop_root $argv[1]
+        set tv_root $argv[2]
+    end
+
+    echo "🔍 Scanning $drop_root against $tv_root...\n"
+
+    for drop_dir in $drop_root/*/
+        set dir_name (basename $drop_dir)
+        echo "📦 $dir_name"
+
+        for f in $drop_dir*.mkv
+            set fname (basename $f)
+            if string match -q "B1_*" $fname
+                continue
+            end
+
+            set d (ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" 2>/dev/null)
+            if test -z "$d"
+                echo "  ⚠️  Could not read: $fname"
+                continue
+            end
+            set mins (math --scale=1 "$d / 60")
+
+            if test (math "$d > 2400") -a (math "$d < 3300")
+                set type "episode"
+            else if test (math "$d >= 3300") -a (math "$d < 7200")
+                set type "extended/alt"
+            else if test (math "$d >= 7200")
+                set type "play-all"
+            else
+                set type "extra"
+            end
+
+            if test "$type" = "episode"
+                set match_found 0
+                for tv_file in $tv_root/**/*.mkv
+                    set tv_d (ffprobe -v error -show_entries format=duration -of csv=p=0 "$tv_file" 2>/dev/null)
+                    if test -z "$tv_d"
+                        continue
+                    end
+                    set diff (math "abs($d - $tv_d)")
+                    if test (math "$diff < 60") -eq 1
+                        set match_found 1
+                        echo "  ✅ $fname (~$mins min) → matches "(basename $tv_file)
+                        break
+                    end
+                end
+                if test $match_found -eq 0
+                    echo "  ❌ $fname (~$mins min) → NO MATCH in library (missing episode?)"
+                end
+            else
+                echo "  ℹ️  $fname (~$mins min) [$type]"
+            end
+        end
+        echo ""
+    end
+
+    echo "✅ Scan complete."
+end
