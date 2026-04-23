@@ -1,3 +1,4 @@
+
 local _mise_python = vim.fn.trim(vim.fn.system("mise which python"))
 if _mise_python ~= "" then
     vim.g.python3_host_prog = _mise_python
@@ -820,6 +821,7 @@ require('lazy').setup({
         terraform_fmt = {
           command = 'tofu',
         },
+      },
     },
   },
 
