@@ -30,6 +30,8 @@ minikube = "1.33.1"
 "npm:typescript" = "latest"
 "npm:@google/gemini-cli" = "latest"
 "npm:@bitwarden/cli" = "latest"
+"npm:@mariozechner/pi-coding-agent" = "latest"
+"npm:pi-opencode" = "latest"       # The provider extension specifically for Pi-agent
 
 {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.arch "arm64") }}
 # --- Pi / ARM Linux (Compile for safety) ---
@@ -68,6 +70,7 @@ minikube = "1.33.1"
 "github:ClementTsang/bottom" = "latest"
 "github:jesseduffield/lazydocker" = "latest"
 "github:jqlang/jq" = "latest"
+"github:sst/opencode" = "latest"   # Installs the high-performance Go binary
 
 # -- Go Packages --
 "go:github.com/cli/cli/v2/cmd/gh" = "latest"

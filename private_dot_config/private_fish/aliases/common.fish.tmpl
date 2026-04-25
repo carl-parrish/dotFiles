@@ -48,6 +48,9 @@ alias mdoctor="mise doctor"
 abbr -a mug 'mise use -g'
 abbr -a mlg 'mise ls --global'
 
+# --- OpenTofu ---
+abbr -a tf 'tofu'
+
 # --- Git (Converted to Abbreviations for better history) ---
 abbr -a g    'git'
 abbr -a ga   'git add'
@@ -102,7 +105,7 @@ abbr -a irp  'infisical run --env prod --'
 abbr -a is   'infisical secrets'
 abbr -a iss  'infisical secrets set'
 abbr -a ir-psql 'infisical run --env dev -- sh -c "PGPASSWORD=\$POSTGRES_PASSWORD psql -U admin -h pgsql"'
-
+abbr -a pir "infisical run --env dev --silent -- sh -c 'GOOGLE_GENERATIVE_AI_API_KEY=\$GEMINI_API_KEY pi --model gemini-2.5-pro'"
 
 # --- The Brain ---
 abbr -a cdn  'cd ~/notes'
