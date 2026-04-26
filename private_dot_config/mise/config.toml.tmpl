@@ -17,6 +17,7 @@ minikube = "1.33.1"
 "github:abiosoft/colima" = "latest"
 "github:lima-vm/lima" = "latest"
 "github:str4d/age-plugin-yubikey" = "latest"
+"npm:mcp-cron-darwin-arm64" = "latest"
 
 {{- else }}
 # Compiles on the Pi / Linode
@@ -32,7 +33,11 @@ minikube = "1.33.1"
 "npm:@bitwarden/cli" = "latest"
 "npm:@mariozechner/pi-coding-agent" = "latest"
 "npm:pi-opencode" = "latest"       # The provider extension specifically for Pi-agent
-"npm:mcp-cron-darwin-arm64" = "latest"
+
+{{- if ne .chezmoi.os "darwin" }}
+# Generic MCP Cron for Linux nodes (avoids EBADPLATFORM)
+"npm:schedule-task-mcp" = "latest"
+{{- end }}
 
 {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.arch "arm64") }}
 # --- Pi / ARM Linux (Compile for safety) ---
