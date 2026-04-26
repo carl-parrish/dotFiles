@@ -1,0 +1,16 @@
+{
+  "surreal-specter": {
+    "command": "npx",
+    "args": ["-y", "@surrealdb/specter", "server"],
+    "env": {
+      "SURREAL_URL": "https://surrealdb.cuttlefish-gorgon.ts.net",
+      "SURREAL_USER": "cparrish",
+      "SURREAL_PASS": {{ output "infisical" "run" "--projectId" .infisical.projectId "--" "printenv" "SURREALDB_PASSWORD" | trim }}
+    }
+  },
+  "mcp-cron": {
+    "command": "mcp-cron-darwin-arm64",
+    "args": [],
+    "env": {}
+  }
+}

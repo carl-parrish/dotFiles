@@ -32,6 +32,7 @@ minikube = "1.33.1"
 "npm:@bitwarden/cli" = "latest"
 "npm:@mariozechner/pi-coding-agent" = "latest"
 "npm:pi-opencode" = "latest"       # The provider extension specifically for Pi-agent
+"npm:mcp-cron-darwin-arm64" = "latest"
 
 {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.arch "arm64") }}
 # --- Pi / ARM Linux (Compile for safety) ---
@@ -53,11 +54,11 @@ minikube = "1.33.1"
 
 # --- Cargo/Rust Tools (Compiled) ---
 # Keeping 'cargo' to ensure ARM64 compatibility on Linux/Pi
-"cargo:spec-kit-mcp" = "latest"
 "cargo:eza" = "latest"
 "cargo:ripgrep" = "latest"
 "cargo:nu" = "latest"
 "cargo:jj-cli" = "latest"
+"cargo:spec-kit-mcp" = "latest"
 
 # --- Universal Binaries (Fast Install) ---
 # --- GitHub Binaries ---
