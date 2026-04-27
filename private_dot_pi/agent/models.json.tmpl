@@ -1,0 +1,17 @@
+{
+  "providers": {
+    "opencode": {
+      "baseUrl": "https://api.opencode.ai/v1",
+      "api": "openai",
+      "apiKey": {{ output "infisical" "run" "--projectId" .infisical.projectId "--" "printenv" "OPENCODE_API_KEY" | trim | quote }},
+      "models": [
+        {
+          "id": "big-pickle",
+          "name": "Big Pickle",
+          "contextWindow": 200000,
+          "input": ["text", "image"]
+        }
+      ]
+    }
+  }
+}
