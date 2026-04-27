@@ -3,14 +3,14 @@
     "opencode": {
       "baseUrl": "https://api.opencode.ai/v1",
       "api": "openai",
-      "apiKey": {{ output "infisical" "run" "--projectId" .infisical.projectId "--" "printenv" "OPENCODE_API_KEY" | trim | quote }},
       "models": [
-        {
-          "id": "big-pickle",
-          "name": "Big Pickle",
-          "contextWindow": 200000,
-          "input": ["text", "image"]
-        }
+        { "id": "big-pickle", "name": "Big Pickle", "contextWindow": 200000 }
+      ]
+    },
+    "google": {
+      "api": "google",
+      "models": [
+        { "id": "gemini-2.0-pro-exp-02-05", "name": "Gemini Pro", "contextWindow": 1000000 }
       ]
     }
   }

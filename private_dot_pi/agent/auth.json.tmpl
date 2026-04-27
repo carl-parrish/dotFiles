@@ -1,0 +1,18 @@
+{{- /* 1. Fetch raw string and parse */ -}}
+{{- $rawJSON := output "infisical" "export" "--env" "dev" "--projectId" .infisical.projectId "--format" "json" | trim -}}
+{{- $secretsList := $rawJSON | fromJson -}}
+
+{{- /* 2. Map the list to a dictionary using your 'key' and 'value' fields */ -}}
+{{- $secrets := dict -}}
+{{- range $secretsList -}}
+  {{- $_ := set $secrets .key .value -}}
+{{- end -}}
+
+{
+  "opencode": {
+    "apiKey": {{ index $secrets "OPENCODE_API_KEY" | quote }}
+  },
+  "google": {
+    "apiKey": {{ index $secrets "GEMINI_API_KEY" | quote }}
+  }
+}

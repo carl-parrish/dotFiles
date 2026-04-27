@@ -92,6 +92,10 @@ abbr -a klogs 'kubectl logs -f'
 abbr -a kx    'kubectx'                    # Quick switch between contexts (Local vs Prod)
 abbr -a kn    'kubens'                     # Quick switch namespaces (default vs homelab)
 
+# --- Pi(agent) ---
+abbr -a bigpi 'pi --model opencode/big-pickle'
+abbr -a gempi 'pi --model google/gemini-2.5-pro'
+
 # Complex Git Aliases (Keep as Alias because they contain logic/pipes )
 alias gwip='git add -A; git rm (git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 # --- Infisical (The Keymaster) ---
@@ -105,7 +109,6 @@ abbr -a irp  'infisical run --env prod --'
 abbr -a is   'infisical secrets'
 abbr -a iss  'infisical secrets set'
 abbr -a ir-psql 'infisical run --env dev -- sh -c "PGPASSWORD=\$POSTGRES_PASSWORD psql -U admin -h pgsql"'
-abbr -a pir "infisical run --env dev --silent -- sh -c 'GOOGLE_GENERATIVE_AI_API_KEY=\$GEMINI_API_KEY pi --model gemini-2.5-pro'"
 
 # --- The Brain ---
 abbr -a cdn  'cd ~/notes'
