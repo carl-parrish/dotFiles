@@ -4,7 +4,7 @@ GOOSE_MODEL: gemini-2.0-flash
 GOOSE_PROVIDER: google
 llm:
 # 🔐 Pulls key from Infisical (setup via 'infisical init')
-  api_key: {{ output "infisical" "run" "--projectId" .infisical.projectId "--" "printenv" "GEMINI_API_KEY" | trim }}
+  api_key: {{ .secrets.GEMINI_API_KEY }}
   model: gemini-2.0-flash
   provider: google
 extensions:
@@ -80,7 +80,7 @@ extensions:
     cmd: spec-kit-mcp
     args: []
     envs:
-      PATH: "/Users/cparrish817/.local/bin:/usr/local/bin:/usr/bin:/bin"
+      PATH: "{{ .chezmoi.homeDir }}/.local/bin:/usr/local/bin:/usr/bin:/bin"
     env_keys: []
     timeout: 300
     bundled: null

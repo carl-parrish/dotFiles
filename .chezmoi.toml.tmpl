@@ -1,31 +1,29 @@
-{{- /* 1. Force a real system hostname check */ -}}
+{{- /* --- LOGIC BLOCK START --- */ -}}
 {{- $realHostname := output "hostname" | trim -}}
-
-{{- $clientId := "" -}}
-{{- $clientSecret := "" -}}
-{{- if (and (hasKey . "infisical") (hasKey .infisical "clientId")) -}}
-{{-   $clientId = .infisical.clientId -}}
+{{- $decrypted := include "bootstrap_secrets.json.age" | decrypt -}}
+{{- $cleaned := $decrypted | replaceAllRegex "\x1b\\[[0-9;]*[a-zA-Z]" "" | replaceAllRegex "\x1b" "" | trim -}}
+{{- $bootstrap := $cleaned | fromJson -}}
+{{- $loginToken := output "infisical" "login" "--method=universal-auth" "--client-id" $bootstrap.clientId "--client-secret" $bootstrap.clientSecret "--plain" "--silent" | trim -}}
+{{- $secrets := dict -}}
+{{- $rawJSON := output "infisical" "export" "--env" "dev" "--projectId" $bootstrap.projectId "--token" $loginToken "--format" "json" "--silent" | trim -}}
+{{- range ($rawJSON | fromJson) -}}
+    {{- $_ := set $secrets .key .value -}}
 {{- end -}}
-{{- if (and (hasKey . "infisical") (hasKey .infisical "clientSecret")) -}}
-{{-   $clientSecret = .infisical.clientSecret -}}
-{{- end -}}
+{{- /* --- LOGIC BLOCK END --- */ -}}
 
-{{- /* 2. Use the real hostname for the prompt guard */ -}}
-{{- if eq $realHostname "raspberrypi" }}
-{{-   if not $clientId -}}
-{{-     $clientId = promptString "Infisical Client ID" -}}
-{{-   end -}}
-{{-   if not $clientSecret -}}
-{{-     $clientSecret = promptString "Infisical Client Secret" -}}
-{{-   end -}}
-{{- end }}
+encryption = "age"
+
+[age]
+    identity = "~/.config/chezmoi/yubikey-identity.txt"
+    recipient = "age1yubikey1q2mm9uxwlf03r37500kz3rtak6g5d8wuuqnkquspslqg6n20x7zsukw42wa"
 
 [data]
     hostname = {{ $realHostname | quote }}
 
 [data.infisical]
-    projectId = "8ae0704f-ad44-4984-bbeb-64b61faa46b5"
-{{- if eq $realHostname "raspberrypi" }}
-    clientId = {{ $clientId | quote }}
-    clientSecret = {{ $clientSecret | quote }}
+    projectId = {{ $bootstrap.projectId | quote }}
+
+[data.secrets]
+{{- range $k, $v := $secrets }}
+    {{ $k }} = {{ $v | quote }}
 {{- end }}
