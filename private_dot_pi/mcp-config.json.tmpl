@@ -5,11 +5,11 @@
     "env": {
       "SURREAL_URL": "https://surrealdb.cuttlefish-gorgon.ts.net",
       "SURREAL_USER": "cparrish",
-      "SURREAL_PASS": {{ output "infisical" "run" "--projectId" .infisical.projectId "--" "printenv" "SURREALDB_PASSWORD" | trim }}
+      "SURREAL_PASS": {{ .secrets.SURREALDB_PASSWORD | quote }}
     }
   },
   "mcp-cron": {
-    "command": "mcp-cron-darwin-arm64",
+    "command": "mcp-cron-{{ .chezmoi.os }}-{{ .chezmoi.arch }}",
     "args": [],
     "env": {}
   }
