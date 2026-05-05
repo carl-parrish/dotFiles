@@ -1,0 +1,23 @@
+[gdrive]
+type = drive
+scope = drive
+token = {{ .secrets.RCLONE_GDRIVE_TOKEN }}
+team_drive = 
+
+[garage]
+type = s3
+provider = Other
+access_key_id = {{ .secrets.GARAGE_KEY_ID }}
+secret_access_key = {{ .secrets.GARAGE_SECRET_KEY }}
+endpoint = s3.cuttlefish-gorgon.ts.net
+force_path_style = true
+region = garage
+
+[cubbit]
+type = s3
+provider = Other
+access_key_id = {{ .secrets.CUBBIT_ACCESS_KEY }}
+secret_access_key = {{ .secrets.CUBBIT_SECRET_KEY }}
+region = cubbit
+endpoint = https://s3.cubbit.eu
+
