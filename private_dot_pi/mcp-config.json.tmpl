@@ -12,5 +12,12 @@
     "command": "mcp-cron-{{ .chezmoi.os }}-{{ .chezmoi.arch }}",
     "args": [],
     "env": {}
+  },
+  "forgejo": {
+  "command": "forgejo-mcp",
+  "args": ["stdio", "--url", "https://git.deeplydigital.net"],
+  "env": {
+    "FORGEJO_ACCESS_TOKEN": {{ output "infisical" "run" "--projectId" .infisical.projectId "--" "printenv" "FORGEJO_AGENT_PAT" | trim }}
   }
+ }
 }
