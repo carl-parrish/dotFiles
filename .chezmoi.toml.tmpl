@@ -21,7 +21,9 @@ encryption = "age"
     hostname = {{ $realHostname | quote }}
 
 [data.infisical]
-    projectId = {{ $bootstrap.projectId | quote }}
+  projectId = {{ $bootstrap.projectId | quote }}
+  clientId = {{ $bootstrap.clientId | quote }}
+  clientSecret = {{ $bootstrap.clientSecret | quote }}
 
 [data.secrets]
 {{- range $k, $v := $secrets }}
