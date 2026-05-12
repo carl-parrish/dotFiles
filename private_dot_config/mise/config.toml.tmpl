@@ -22,7 +22,7 @@ minikube = "1.33.1"
 {{- else }}
 # Compiles on the Pi / Linode
 "cargo:age-plugin-yubikey" = "latest"
-"github:aristocratos/btop" = "latest"
+"cargo:btop" = "latest"
 {{- end }}
 
 
@@ -47,6 +47,9 @@ minikube = "1.33.1"
 "cargo:bat" = "latest"
 "cargo:fd-find" = "latest"
 "cargo:starship" = "latest"
+"cargo:du-dust" = "latest"
+"cargo:dua-cli" = "latest"
+
 {{- else }}
 # --- Mac / Mint-Mini (Use stable binaries) ---
 "github:zellij-org/zellij" = "latest"
@@ -55,6 +58,8 @@ minikube = "1.33.1"
 "github:sharkdp/bat" = "latest"
 "github:sharkdp/fd" = "latest"
 "github:starship/starship" = "latest"
+"github:bootandy/dust" = "latest"
+"github:Byron/dua-cli" = "latest"
 {{- end }}
 
 # --- Cargo/Rust Tools (Compiled) ---
