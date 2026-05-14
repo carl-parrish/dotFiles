@@ -2,6 +2,7 @@
 .config/fish/fish_variables
 .config/fish/conf.d/fish_frozen_*
 .config/nvim/lazy-lock.json
+bootstrap_secrets.json
 # Only deploy machine auth to Linux machines (Pi/Chromebooks)
 {{ if eq .chezmoi.os "darwin" }}
 .config/fish/conf.d/infisical_auth.fish

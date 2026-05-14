@@ -3,9 +3,9 @@
 {{- $decrypted := include "bootstrap_secrets.json.age" | decrypt -}}
 {{- $cleaned := $decrypted | replaceAllRegex "\x1b\\[[0-9;]*[a-zA-Z]" "" | replaceAllRegex "\x1b" "" | trim -}}
 {{- $bootstrap := $cleaned | fromJson -}}
-{{- $loginToken := output "infisical" "login" "--method=universal-auth" "--client-id" $bootstrap.clientId "--client-secret" $bootstrap.clientSecret "--plain" "--silent" | trim -}}
+{{- $loginToken := output "infisical" "login" "--method=universal-auth" "--client-id" $bootstrap.clientId "--client-secret" $bootstrap.clientSecret "--domain" $bootstrap.domain "--plain" "--silent" | trim -}}
 {{- $secrets := dict -}}
-{{- $rawJSON := output "infisical" "export" "--env" "dev" "--projectId" $bootstrap.projectId "--token" $loginToken "--format" "json" "--silent" | trim -}}
+{{- $rawJSON := output "infisical" "export" "--env" "dev" "--projectId" $bootstrap.projectId "--token" $loginToken "--domain" $bootstrap.domain "--format" "json" "--silent" | trim -}}
 {{- range ($rawJSON | fromJson) -}}
     {{- $_ := set $secrets .key .value -}}
 {{- end -}}
