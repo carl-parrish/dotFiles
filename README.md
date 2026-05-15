@@ -61,17 +61,17 @@ sudo dnf install fish
 ```
 
 #### Arch / CachyOS:
-    ```bash
+```bash
     sudo pacman -Syu --noconfirm fish
-    ```
-### 0. Ensure fish is in /etc/shells and change default shell**
-    ```bash
+```
+###  Ensure fish is in /etc/shells and change default shell**
+```bash
     if ! grep -q "$(which fish)" /etc/shells; then
       echo "$(which fish)" | sudo tee -a /etc/shells
     fi
     chsh -s "$(which fish)"
-    ```
-### 0. Install Basics
+```
+###  Install Basics
 Note: package managers are still the right tool for a few system-level dependencies during initial bootstrap.
 
 Arch / CachyOS example
@@ -79,13 +79,13 @@ Arch / CachyOS example
 sudo pacman -Syu --noconfirm git curl fish neovim gcc base-devel
 ```
 
-### 0. Install and Authenticate Tailscale
+###  Install and Authenticate Tailscale
 ```bash
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up
 ```
 
-### 0. Install Chezmoi and Apply Dotfiles
+###  Install Chezmoi and Apply Dotfiles
 Option A: Public Repo
 ```bash
 sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply https://github.com/carl-parrish/dotFiless
@@ -94,17 +94,17 @@ Option B: Tailnet Repo
 ```
 sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply https://git.deeplydigital.net/cparrish/dotFiles
 ```
-### 0. Finalize Setup
+###  Finalize Setup
 Reload the shell so paths and configs are active:
 ```bash
 exec fish
 ```
-### 0. Authenticate Tools
-```Bash
+###  Authenticate Tools
+```bash
 atuin login
 ```
 
-```Bash
+```bash
 infisical login
 ```
 
