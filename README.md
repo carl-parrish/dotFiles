@@ -104,6 +104,7 @@ sudo tailscale up
 ```
 
 ### Install Chezmoi and Apply Dotfiles
+> ⚠️ **CRITICAL FOR SECURE NODES:** If you are setting up a machine that requires decrypting repository secrets via YubiKey, **DO NOT run the one-liners below**. They will fail immediately on template compilation. Instead, follow the step-by-step pipeline in [bootstrap.md](./bootstrap.md).
 
 #### Option A: Public Repo
 
