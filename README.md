@@ -52,7 +52,7 @@ This repository manages things like:
 
 ## Bootstrap Instructions
 
-### 1. Install Fish Shell
+### 0. Install Fish Shell
 
 #### Fedora / Bluefin
 
@@ -60,18 +60,18 @@ This repository manages things like:
 sudo dnf install fish
 ```
 
-* **Arch / CachyOS:**
+#### Arch / CachyOS:
     ```bash
     sudo pacman -Syu --noconfirm fish
     ```
-* **Ensure fish is in /etc/shells and change default shell**
+### 0. Ensure fish is in /etc/shells and change default shell**
     ```bash
     if ! grep -q "$(which fish)" /etc/shells; then
       echo "$(which fish)" | sudo tee -a /etc/shells
     fi
     chsh -s "$(which fish)"
     ```
-2. Install Basics
+### 0. Install Basics
 Note: package managers are still the right tool for a few system-level dependencies during initial bootstrap.
 
 Arch / CachyOS example
@@ -79,13 +79,13 @@ Arch / CachyOS example
 sudo pacman -Syu --noconfirm git curl fish neovim gcc base-devel
 ```
 
-3. Install and Authenticate Tailscale
+### 0. Install and Authenticate Tailscale
 ```bash
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up
 ```
 
-4. Install Chezmoi and Apply Dotfiles
+### 0. Install Chezmoi and Apply Dotfiles
 Option A: Public Repo
 ```bash
 sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply https://github.com/carl-parrish/dotFiless
@@ -94,12 +94,12 @@ Option B: Tailnet Repo
 ```
 sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply https://git.deeplydigital.net/cparrish/dotFiles
 ```
-5. Finalize Setup
+### 0. Finalize Setup
 Reload the shell so paths and configs are active:
 ```bash
 exec fish
 ```
-6. Authenticate Tools
+### 0. Authenticate Tools
 ```Bash
 atuin login
 ```
