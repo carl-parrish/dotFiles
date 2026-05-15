@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Ensure Kopia binary is actually present before trying to connect
+if ! command -v kopia >/dev/null 2>&1; then
+    echo "⚠️ Kopia binary not found. Skipping repository initialization."
+    exit 0
+fi
+
+KOPIA_DIR="{{ .chezmoi.homeDir }}/.config/kopia"
+CUBBIT_CONF="$KOPIA_DIR/cubbit-vault.config"
+
+mkdir -p "$KOPIA_DIR"
+
+if [ ! -f "$CUBBIT_CONF" ]; then
+    echo "🔒 Initializing platform-specific Cubbit Kopia profile..."
+    
+    # Chezmoi securely injects the transient secrets from your .chezmoi.toml payload
+    kopia --config-file="$CUBBIT_CONF" repository connect s3 \
+        --bucket="kopia-backup-mirror" \
+        --endpoint="{{ .secrets.CUBBIT_ENDPOINT }}" \
+        --access-key="{{ .secrets.CUBBIT_ACCESS_KEY }}" \
+        --secret-access-key="{{ .secrets.CUBBIT_SECRET_KEY }}" \
+        --password="{{ .secrets.KOPIA_PASSWORD }}"
+        
+    # Enforce compression policy on creation
+    kopia --config-file="$CUBBIT_CONF" policy set --global --compression=zstd-better-compression
+else
+    echo "✅ Cubbit Kopia profile is already verified and connected."
+fi
