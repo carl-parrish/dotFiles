@@ -88,7 +88,7 @@ sudo tailscale up
 ###  Install Chezmoi and Apply Dotfiles
 Option A: Public Repo
 ```bash
-sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply https://github.com/carl-parrish/dotFiless
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply https://github.com/carl-parrish/dotFiles
 ```
 Option B: Tailnet Repo
 ```
