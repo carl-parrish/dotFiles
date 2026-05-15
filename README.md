@@ -52,7 +52,7 @@ This repository manages things like:
 
 ## Bootstrap Instructions
 
-### 0. Install Fish Shell
+### Install Fish Shell
 
 #### Fedora / Bluefin
 
@@ -138,8 +138,8 @@ That consistency reduces friction, mistakes, and setup time.
 - Practicality wins over purity.
   
 ## Related Repositories
-[dotFiles](https://github.com/carl-parrish/dotFiles/blob/main/README.md)
-[homelab](https://github.com/carl-parrish/homelab)
+- [dotFiles](https://github.com/carl-parrish/dotFiles/blob/main/README.md)
+- [homelab](https://github.com/carl-parrish/homelab)
 
 > I do not need every machine to already be mine. I need every machine to become mine quickly.
 
