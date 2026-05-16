@@ -1,29 +1,33 @@
 #!/bin/bash
 
-# Ensure Kopia binary is actually present before trying to connect
-if ! command -v kopia >/dev/null 2>&1; then
-    echo "⚠️ Kopia binary not found. Skipping repository initialization."
-    exit 0
-fi
+# Ensure Kopia is present
+command -v kopia >/dev/null 2>&1 || exit 0
 
 KOPIA_DIR="{{ .chezmoi.homeDir }}/.config/kopia"
-CUBBIT_CONF="$KOPIA_DIR/cubbit-vault.config"
 
-mkdir -p "$KOPIA_DIR"
-
-if [ ! -f "$CUBBIT_CONF" ]; then
-    echo "🔒 Initializing platform-specific Cubbit Kopia profile..."
+# Simply loop through the password files chezmoi created to initialize any missing configs
+for PASS_FILE in "$KOPIA_DIR"/*.config.kopia-password; do
+    [ -e "$PASS_FILE" ] || continue
     
-    # Chezmoi securely injects the transient secrets from your .chezmoi.toml payload
-    kopia --config-file="$CUBBIT_CONF" repository connect s3 \
-        --bucket="kopia-backup-mirror" \
-        --endpoint="{{ .secrets.CUBBIT_ENDPOINT }}" \
-        --access-key="{{ .secrets.CUBBIT_ACCESS_KEY }}" \
-        --secret-access-key="{{ .secrets.CUBBIT_SECRET_KEY }}" \
-        --password="{{ .secrets.KOPIA_PASSWORD }}"
+    # Extract the profile name (e.g., "cubbit-vault")
+    PROFILE=$(basename "$PASS_FILE" .config.kopia-password)
+    CONF_FILE="$KOPIA_DIR/${PROFILE}.config"
+    
+    if [ ! -f "$CONF_FILE" ]; then
+        echo "🔒 Initializing Kopia profile connection for $PROFILE..."
         
-    # Enforce compression policy on creation
-    kopia --config-file="$CUBBIT_CONF" policy set --global --compression=zstd-better-compression
-else
-    echo "✅ Cubbit Kopia profile is already verified and connected."
-fi
+        case "$PROFILE" in
+            "repository")
+                kopia --config-file="$CONF_FILE" repository connect s3 --bucket="backup-garage" --endpoint="{{ .secrets.GARAGE_ENDPOINT }}" --access-key="{{ .secrets.GARAGE_KEY_ID }}" --secret-access-key="{{ .secrets.GARAGE_SECRET_KEY }}"
+                ;;
+            "cubbit-vault")
+                kopia --config-file="$CONF_FILE" repository connect s3 --bucket="kopia-backup-mirror" --endpoint="{{ .secrets.CUBBIT_ENDPOINT }}" --access-key="{{ .secrets.CUBBIT_ACCESS_KEY }}" --secret-access-key="{{ .secrets.CUBBIT_SECRET_KEY }}"
+                ;;
+            "cloudflare-r2")
+                kopia --config-file="$CONF_FILE" repository connect s3 --bucket="cloud-backup" --endpoint="{{ .secrets.R2_ENDPOINT }}" --access-key="{{ .secrets.R2_ACCESS_KEY }}" --secret-access-key="{{ .secrets.R2_SECRET_KEY }}"
+                ;;
+        esac
+        
+        kopia --config-file="$CONF_FILE" policy set --global --compression=zstd-better-compression
+    fi
+done
