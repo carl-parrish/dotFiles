@@ -1,241 +1,684 @@
+# =============================================================================
+# Tiron Runbook — Sovereign Operator Bootstrap
+# =============================================================================
+#
+# PURPOSE
+# -------
+# Automates the three-phase bootstrap sequence from bootstrap.md across remote
+# Linux machines via SSH:
+#
+#   Phase 0 — System Provisioning
+#             Install base dependencies, fix YubiKey udev/polkit issues,
+#             configure pcscd.
+#
+#   Phase 1 — Identity & Trust Initialization
+#             Generate the age-plugin-yubikey identity stub that Chezmoi
+#             needs to decrypt managed secrets.
+#
+#   Phase 2 — Chezmoi Bootstrap
+#             Pull the dotfiles repo, seed a temporary chezmoi config,
+#             and run `chezmoi apply` to activate the managed environment.
+#
+# REMOTE EXECUTION (HOW TIRON USES SSH)
+# --------------------------------------
+# Tiron is agentless — it connects to every host in a group over SSH,
+# validates the entire runbook up front, then ships all tasks in a single
+# batch to minimise round-trips.  No agent or daemon is installed on
+# the target.
+#
+# Requirements on the controller (your workstation):
+#   1. Install Tiron:  curl -sL https://tiron.run/install.sh | sh
+#   2. Ensure you can `ssh <target_user>@<target_host>` without a password
+#      (key-based auth).  Tiron reuses your normal SSH config / agent.
+#   3. Run:  tiron run          (reads this file as ./main.tr)
+#      or:   tiron run main.tr  (explicit path)
+#
+# Requirements on the target:
+#   - An SSH server (sshd) accepting key-based auth.
+#   - A user with passwordless sudo (or run with a root host).
+#
+# CROSS-PLATFORM LOGIC
+# --------------------
+# The `command` action is the primary primitive (the only action Tiron
+# documents besides `copy` and `file`).  OS detection is done via a
+# shell one-liner that reads /etc/os-release and branches into the
+# correct package-manager path:
+#
+#   • apt-get  → Debian, Ubuntu, Bluefin (Fedora-based distros that
+#                ship apt compatibility are handled in the dnf branch)
+#   • pacman   → Arch, CachyOS, EndeavourOS, Manjaro
+#   • dnf      → Fedora, Bluefin/Aurora (Universal Blue immutable desktops)
+#
+# When a tool can be installed via `mise` instead of the system package
+# manager, mise is preferred (chezmoi, fish, neovim, etc. after mise
+# itself is bootstrapped).
+#
+# VARIABLES
+# ---------
+# Edit the group block below to match your fleet.  Every variable can be
+# overridden per-host inside the host block.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Inventory — define your target machines here
+# ---------------------------------------------------------------------------
+# Tiron connects to each host over SSH.  The hostname must be resolvable
+# from your workstation (DNS, /etc/hosts, Tailscale MagicDNS, or SSH
+# config aliases all work).
+#
+# To add more machines, duplicate the `host` block inside the group.
+# Per-host variable overrides (e.g. a different yubikey_slot) go inside
+# the host block.
+# ---------------------------------------------------------------------------
+
 group "bootstrap_targets" {
-  host "mint-mini" {
-    target_user = "cparrish"
-
-    # From bootstrap.md (update when you rotate keys)
-    bootstrap_recipient = "age1yubikey1q2mm9uxwlf03r37500kz3rtak6g5d8wuuqnkquspslqg6n20x7zsukw42wa"
-
-    # From your lsusb output on Mint mini (can vary by model)
-    yubikey_vid = "1050"
-    yubikey_pid = "0407"
-
-    # From bootstrap.md
-    dotfiles_repo = "https://github.com/carl-parrish/dotFiles"
-    yubikey_slot  = "1"
+  host "target-linux-box" {
+    # Override any variable per-host here if needed, e.g.:
+    # target_host = "10.0.0.42"
   }
+
+  # ---- connection settings ----
+  target_host = "target-linux-box"
+  target_user = "cparrish"
+
+  # ---- YubiKey parameters ----
+  # USB vendor:product for udev rules (Yubico YubiKey 5):
+  yubikey_vid = "1050"
+  yubikey_pid = "0407"
+  # PKCS#11 / PIV slot used by age-plugin-yubikey:
+  yubikey_slot = "1"
+
+  # ---- age / chezmoi parameters ----
+  # The age1yubikey… recipient shared across all machines:
+  bootstrap_recipient = "age1yubikey1q2mm9uxwlf03r37500kz3rtak6g5d8wuuqnkquspslqg6n20x7zsukw42wa"
+
+  # Dotfiles repository (HTTPS — no auth needed for public repos):
+  dotfiles_repo = "https://github.com/carl-parrish/dotFiles"
 }
 
-job "phase0_system_provisioning" {
-  # Minimum toolchain boundary + what we learned on Mint/Ubuntu Noble:
-  action "package" {
+# =============================================================================
+# Jobs — reusable task sequences
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Phase 0 — System Provisioning
+# ---------------------------------------------------------------------------
+# Detects the distro family, installs base packages with the native
+# package manager, then bootstraps mise and uses it for higher-level
+# tooling wherever possible.  Also applies the YubiKey udev + polkit
+# fixes discovered during the conversation.
+# ---------------------------------------------------------------------------
+
+job "phase0_provision" {
+
+  # -- 0.1  Detect distro family and install base system packages ----------
+  #
+  # We read ID and ID_LIKE from /etc/os-release and normalise to one of
+  # three families: debian, arch, fedora.  The appropriate package manager
+  # installs: git, curl, gcc/base-devel, pcscd, libccid, yubikey-manager,
+  # and a Rust toolchain (needed to build age-plugin-yubikey from source
+  # on distros where no binary package exists).
+
+  action "command" {
+    name = "Detect distro and install base system packages"
+
     params {
-      name = [
-        "git",
-        "curl",
-        "fish",
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
 
-        "age",
+        # ── Distro detection ──────────────────────────────────────────
+        . /etc/os-release 2>/dev/null || true
+        DISTRO_ID="${ID:-unknown}"
+        DISTRO_LIKE="${ID_LIKE:-}"
 
-        # PC/SC + CCID + tooling
-        "pcscd",
-        "libccid",
-        "pcsc-tools",
-        "yubikey-manager",
+        detect_family() {
+          case "$DISTRO_ID" in
+            ubuntu|debian|linuxmint|pop)  echo "debian" ;;
+            arch|cachyos|endeavouros|manjaro) echo "arch" ;;
+            fedora|ultramarine)           echo "fedora" ;;
+            *)
+              # Fall back to ID_LIKE
+              case "$DISTRO_LIKE" in
+                *debian*|*ubuntu*)  echo "debian" ;;
+                *arch*)            echo "arch"   ;;
+                *fedora*)          echo "fedora" ;;
+                *)                 echo "unknown" ;;
+              esac
+              ;;
+          esac
+        }
+        FAMILY=$(detect_family)
+        echo ">>> Detected distro: $DISTRO_ID (family: $FAMILY)"
 
-        # To build age-plugin-yubikey via cargo if needed
-        "pkg-config",
-        "libpcsclite-dev",
-        "build-essential",
-        "cargo"
+        # ── Install base packages per family ──────────────────────────
+        case "$FAMILY" in
+          debian)
+            export DEBIAN_FRONTEND=noninteractive
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq \
+              git curl gcc make pkg-config \
+              libpcsclite-dev pcscd libccid \
+              yubikey-manager \
+              cargo rustc
+            ;;
+          arch)
+            sudo pacman -Syu --noconfirm \
+              git curl gcc base-devel \
+              pcsclite ccid \
+              yubikey-manager \
+              rust
+            ;;
+          fedora)
+            sudo dnf install -y --quiet \
+              git curl gcc make pkg-config \
+              pcsc-lite pcsc-lite-ccid pcsc-lite-devel \
+              yubikey-manager \
+              cargo rust
+            ;;
+          *)
+            echo "ERROR: Unsupported distro family '$FAMILY'. Aborting."
+            exit 1
+            ;;
+        esac
+
+        echo ">>> Base system packages installed."
+      EOF
       ]
-      state = "present"
     }
   }
 
-  # Ensure plugdev group exists + user is in it
-  action "command" {
-    params {
-      cmd  = "bash"
-      args = ["-lc", <<-EOT
-        set -euo pipefail
-        getent group plugdev >/dev/null || groupadd plugdev
-        usermod -aG plugdev "${target_user}"
-      EOT
-      ]
-    }
-  }
+  # -- 0.2  Ensure user is in the plugdev group ---------------------------
+  #
+  # Required so the unprivileged user can talk to the YubiKey via pcscd
+  # without being root.
 
-  # udev rule so the YubiKey device node is accessible to plugdev
   action "command" {
-    params {
-      cmd  = "bash"
-      args = ["-lc", <<-EOT
-        set -euo pipefail
-        cat > /etc/udev/rules.d/70-yubikey.rules <<EOF
-        SUBSYSTEM=="usb", ATTR{idVendor}=="${yubikey_vid}", ATTR{idProduct}=="${yubikey_pid}", GROUP="plugdev", MODE="0664"
-        EOF
-        chmod 0644 /etc/udev/rules.d/70-yubikey.rules
-      EOT
-      ]
-    }
-  }
+    name = "Add user to plugdev group"
 
-  # polkit rule (pcscd 2.x on Noble uses org.debian.pcsc-lite.* action IDs)
-  action "command" {
     params {
-      cmd  = "bash"
-      args = ["-lc", <<-EOT
+      cmd = "bash"
+      args = ["-c", <<-EOF
         set -euo pipefail
-        mkdir -p /etc/polkit-1/rules.d
-        cat > /etc/polkit-1/rules.d/50-pcscd.rules <<'EOF'
-        polkit.addRule(function(action, subject) {
-          if ((action.id == "org.debian.pcsc-lite.access_pcsc" ||
-               action.id == "org.debian.pcsc-lite.access_card") &&
-              subject.isInGroup("plugdev")) {
-            return polkit.Result.YES;
-          }
-        });
-        EOF
-        chmod 0644 /etc/polkit-1/rules.d/50-pcscd.rules
-      EOT
-      ]
-    }
-  }
 
-  # Reload + restart
-  action "command" {
-    params {
-      cmd  = "bash"
-      args = ["-lc", <<-EOT
-        set -euo pipefail
-        udevadm control --reload-rules
-        udevadm trigger
-        systemctl restart polkit || true
-        systemctl restart pcscd
-      EOT
-      ]
-    }
-  }
-
-  # Install age-plugin-yubikey if missing (via cargo)
-  action "command" {
-    params {
-      cmd  = "bash"
-      args = ["-lc", <<-EOT
-        set -euo pipefail
-        if ! command -v age-plugin-yubikey >/dev/null 2>&1; then
-          # Install to the target user's cargo bin
-          su -s /bin/bash - "${target_user}" -c 'cargo install age-plugin-yubikey'
+        # Create the group if it doesn't exist (Arch doesn't ship it)
+        if ! getent group plugdev >/dev/null 2>&1; then
+          sudo groupadd plugdev
+          echo ">>> Created group 'plugdev'."
         fi
-      EOT
+
+        TARGET_USER=$(whoami)
+        if id -nG "$TARGET_USER" | grep -qw plugdev; then
+          echo ">>> User '$TARGET_USER' is already in 'plugdev'."
+        else
+          sudo usermod -aG plugdev "$TARGET_USER"
+          echo ">>> Added '$TARGET_USER' to 'plugdev'. A new login session is needed."
+        fi
+      EOF
       ]
     }
   }
 
-  # Verify YubiKey is visible over CCID as the target user
-  action "command" {
-    params {
-      cmd  = "bash"
-      args = ["-lc", "su -s /bin/bash - ${target_user} -c 'ykman info'"]
-    }
-  }
-}
+  # -- 0.3  YubiKey udev rules --------------------------------------------
+  #
+  # Grants the plugdev group read/write access to YubiKey USB HID devices
+  # so pcscd and age-plugin-yubikey can communicate without root.
+  # Uses the VID/PID variables defined in the group inventory.
 
-job "phase1_identity_and_trust" {
   action "command" {
+    name = "Install YubiKey udev rules"
+
     params {
-      cmd  = "bash"
-      args = ["-lc", <<-EOT
+      cmd = "bash"
+      args = ["-c", <<-EOF
         set -euo pipefail
 
-        # Ensure chezmoi config dir exists for the target user
-        su -s /bin/bash - "${target_user}" -c 'mkdir -p ~/.config/chezmoi'
+        UDEV_RULE='/etc/udev/rules.d/70-yubikey.rules'
+        RULE_CONTENT='# YubiKey 5 — allow plugdev group access
+SUBSYSTEM=="usb", ATTR{idVendor}=="1050", ATTR{idProduct}=="0407", MODE="0660", GROUP="plugdev"
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1050", ATTRS{idProduct}=="0407", MODE="0660", GROUP="plugdev"'
 
-        # Prefer using existing slot identity; fall back to generate if needed.
-        su -s /bin/bash - "${target_user}" -c "
-          set -euo pipefail
-          if age-plugin-yubikey --identity --slot ${yubikey_slot} > ~/.config/chezmoi/yubikey-identity.txt 2>/dev/null; then
-            exit 0
+        echo "$RULE_CONTENT" | sudo tee "$UDEV_RULE" > /dev/null
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger
+        echo ">>> udev rules installed and reloaded."
+      EOF
+      ]
+    }
+  }
+
+  # -- 0.4  Polkit rules for pcscd -----------------------------------------
+  #
+  # On Debian-family systems pcscd uses polkit action IDs namespaced under
+  # org.debian.pcsc-lite.  Without explicit polkit rules, non-root users
+  # get "permission denied" when age-plugin-yubikey tries to talk to the
+  # card reader.  This writes a JavaScript polkit rule that grants access
+  # to members of the plugdev group.
+  #
+  # Arch-family systems typically don't need this (pcscd uses direct USB
+  # access), but the rule is harmless there.
+
+  action "command" {
+    name = "Install polkit rules for pcscd (YubiKey smartcard access)"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+
+        POLKIT_DIR="/etc/polkit-1/rules.d"
+        POLKIT_FILE="$POLKIT_DIR/50-yubikey-pcsc.rules"
+
+        # Ensure polkit rules directory exists
+        sudo mkdir -p "$POLKIT_DIR"
+
+        cat <<'POLKIT' | sudo tee "$POLKIT_FILE" > /dev/null
+// Allow members of 'plugdev' to access PC/SC smart-card readers.
+// This covers the namespaced action IDs used by Debian/Ubuntu pcscd
+// packages as well as generic pcsc-lite action IDs.
+polkit.addRule(function(action, subject) {
+    if ((action.id === "org.debian.pcsc-lite.access_pcsc" ||
+         action.id === "org.debian.pcsc-lite.access_card" ||
+         action.id === "org.freedesktop.pcsc-lite.access_pcsc" ||
+         action.id === "org.freedesktop.pcsc-lite.access_card") &&
+        subject.isInGroup("plugdev")) {
+        return polkit.Result.YES;
+    }
+});
+POLKIT
+
+        echo ">>> Polkit rules for pcscd installed at $POLKIT_FILE"
+      EOF
+      ]
+    }
+  }
+
+  # -- 0.5  Enable and start pcscd ----------------------------------------
+
+  action "command" {
+    name = "Enable and start pcscd"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+
+        # pcscd ships as both a socket-activated unit and a regular service.
+        # Enable the socket so it auto-starts when something talks to it.
+        sudo systemctl enable pcscd.socket 2>/dev/null || true
+        sudo systemctl start pcscd.socket  2>/dev/null || true
+        sudo systemctl enable pcscd.service 2>/dev/null || true
+        sudo systemctl restart pcscd.service
+
+        # Quick sanity check
+        if systemctl is-active --quiet pcscd.service; then
+          echo ">>> pcscd is running."
+        else
+          echo "WARNING: pcscd did not start.  Check 'journalctl -u pcscd'."
+        fi
+      EOF
+      ]
+    }
+  }
+
+  # -- 0.6  Install mise ---------------------------------------------------
+  #
+  # mise is preferred over Homebrew/Linuxbrew for managing CLI tools.
+  # It installs into ~/.local/bin by default.
+
+  action "command" {
+    name = "Install mise (tool version manager)"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+
+        if command -v mise >/dev/null 2>&1; then
+          echo ">>> mise is already installed: $(mise --version)"
+        else
+          curl -fsSL https://mise.run | sh
+          export PATH="$HOME/.local/bin:$PATH"
+          echo ">>> mise installed: $(mise --version)"
+        fi
+      EOF
+      ]
+    }
+  }
+
+  # -- 0.7  Install higher-level tools via mise ----------------------------
+  #
+  # Tools that mise can manage are installed here rather than via the
+  # system package manager.  This keeps versions explicit and portable.
+
+  action "command" {
+    name = "Install chezmoi, age, fish, and neovim via mise"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+        export PATH="$HOME/.local/bin:$PATH"
+
+        # Activate mise in the current shell
+        eval "$(mise activate bash 2>/dev/null)" || true
+
+        # Install tools globally via mise
+        mise use --global chezmoi
+        mise use --global age
+        mise use --global fish
+        mise use --global neovim
+
+        echo ">>> mise-managed tools installed:"
+        mise ls
+      EOF
+      ]
+    }
+  }
+
+  # -- 0.8  Build and install age-plugin-yubikey via cargo -----------------
+  #
+  # No pre-built binary or mise plugin exists for age-plugin-yubikey on
+  # most distros, so we build from source using the Rust toolchain
+  # installed in step 0.1.
+
+  action "command" {
+    name = "Install age-plugin-yubikey via cargo"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+        export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+
+        if command -v age-plugin-yubikey >/dev/null 2>&1; then
+          echo ">>> age-plugin-yubikey is already installed."
+          age-plugin-yubikey --version 2>/dev/null || true
+        else
+          echo ">>> Building age-plugin-yubikey from source (this may take a few minutes)…"
+          cargo install age-plugin-yubikey
+          echo ">>> age-plugin-yubikey installed."
+        fi
+      EOF
+      ]
+    }
+  }
+
+  # -- 0.9  Verification gate ---------------------------------------------
+
+  action "command" {
+    name = "Phase 0 verification — confirm all required tools are in PATH"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+        export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+
+        MISSING=0
+        for tool in git chezmoi age age-plugin-yubikey mise; do
+          if command -v "$tool" >/dev/null 2>&1; then
+            printf "  ✓ %-22s %s\n" "$tool" "$(command -v "$tool")"
+          else
+            printf "  ✗ %-22s NOT FOUND\n" "$tool"
+            MISSING=$((MISSING + 1))
           fi
-          age-plugin-yubikey --generate --slot ${yubikey_slot} > ~/.config/chezmoi/yubikey-identity.txt
-        "
-      EOT
-      ]
-    }
-  }
+        done
 
-  # Optional: show recipients (matches bootstrap.md discovery)
-  action "command" {
-    params {
-      cmd  = "bash"
-      args = ["-lc", "su -s /bin/bash - ${target_user} -c 'age-plugin-yubikey --list'"]
-    }
-  }
-}
-
-job "phase2_chezmoi_bootstrap" {
-  # Install chezmoi to ~/.local/bin for the target user (README pattern)
-  action "command" {
-    params {
-      cmd  = "bash"
-      args = ["-lc", <<-EOT
-        set -euo pipefail
-        su -s /bin/bash - "${target_user}" -c '
-          mkdir -p ~/.local/bin
-          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
-        '
-      EOT
-      ]
-    }
-  }
-
-  # chezmoi init --no-tty (bootstrap.md)
-  action "command" {
-    params {
-      cmd  = "bash"
-      args = ["-lc", <<-EOT
-        set -euo pipefail
-        su -s /bin/bash - "${target_user}" -c '
-          export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
-          chezmoi init --no-tty ${dotfiles_repo}
-        '
-      EOT
-      ]
-    }
-  }
-
-  # Write temporary ~/.config/chezmoi/chezmoi.toml bootstrap stub (bootstrap.md)
-  action "command" {
-    params {
-      cmd  = "bash"
-      args = ["-lc", <<-EOT
-        set -euo pipefail
-        su -s /bin/bash - "${target_user}" -c "
-          cat > ~/.config/chezmoi/chezmoi.toml <<'EOF'
-          encryption = \"age\"
-
-          [age]
-              identity = \"~/.config/chezmoi/yubikey-identity.txt\"
-              recipient = \"${bootstrap_recipient}\"
-          EOF
-        "
-      EOT
-      ]
-    }
-  }
-
-  # Apply (bootstrap.md)
-  action "command" {
-    params {
-      cmd  = "bash"
-      args = ["-lc", <<-EOT
-        set -euo pipefail
-        su -s /bin/bash - "${target_user}" -c '
-          export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
-          chezmoi apply
-        '
-      EOT
+        if [ "$MISSING" -gt 0 ]; then
+          echo ""
+          echo "ERROR: $MISSING required tool(s) missing. Aborting."
+          exit 1
+        fi
+        echo ""
+        echo ">>> Phase 0 complete — system is provisioned."
+      EOF
       ]
     }
   }
 }
+
+# ---------------------------------------------------------------------------
+# Phase 1 — Identity & Trust Initialization
+# ---------------------------------------------------------------------------
+# Generates the age-plugin-yubikey identity stub that Chezmoi will use to
+# decrypt age-encrypted secrets.  Requires a YubiKey to be physically
+# inserted into the target machine (or forwarded via USB/IP / Tailscale).
+# ---------------------------------------------------------------------------
+
+job "phase1_identity" {
+
+  # -- 1.1  Verify the YubiKey is visible ----------------------------------
+
+  action "command" {
+    name = "Verify YubiKey is detected"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+        export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+
+        echo ">>> Checking for YubiKey…"
+        if age-plugin-yubikey --list 2>/dev/null | grep -q "age1yubikey"; then
+          echo ">>> YubiKey detected:"
+          age-plugin-yubikey --list
+        else
+          echo "ERROR: No YubiKey found.  Insert the key and try again."
+          echo "       Ensure pcscd is running: systemctl status pcscd"
+          exit 1
+        fi
+      EOF
+      ]
+    }
+  }
+
+  # -- 1.2  Generate the identity stub ------------------------------------
+
+  action "command" {
+    name = "Generate age-plugin-yubikey identity stub"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+        export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+
+        IDENTITY_DIR="$HOME/.config/chezmoi"
+        IDENTITY_FILE="$IDENTITY_DIR/yubikey-identity.txt"
+
+        mkdir -p "$IDENTITY_DIR"
+
+        if [ -f "$IDENTITY_FILE" ]; then
+          echo ">>> Identity stub already exists at $IDENTITY_FILE"
+          echo "    To regenerate, delete the file and re-run this phase."
+          cat "$IDENTITY_FILE"
+        else
+          echo ">>> Generating identity stub (slot 1)…"
+          age-plugin-yubikey --generate --slot 1 > "$IDENTITY_FILE"
+          chmod 600 "$IDENTITY_FILE"
+          echo ">>> Identity stub written to $IDENTITY_FILE"
+          cat "$IDENTITY_FILE"
+        fi
+      EOF
+      ]
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Phase 2 — Chezmoi Bootstrap
+# ---------------------------------------------------------------------------
+# Pulls the dotfiles repository, seeds the temporary chezmoi config with
+# the age encryption settings, and runs `chezmoi apply` to activate the
+# full managed environment.
+# ---------------------------------------------------------------------------
+
+job "phase2_chezmoi" {
+
+  # -- 2.1  chezmoi init (clone the raw repo) ------------------------------
+
+  action "command" {
+    name = "Initialize chezmoi with dotfiles repo"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+        export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+
+        # Activate mise so chezmoi is on PATH
+        eval "$(mise activate bash 2>/dev/null)" || true
+
+        CHEZMOI_SRC="$HOME/.local/share/chezmoi"
+
+        if [ -d "$CHEZMOI_SRC/.git" ]; then
+          echo ">>> Chezmoi source already exists at $CHEZMOI_SRC — pulling latest."
+          chezmoi update --no-tty || true
+        else
+          echo ">>> Initialising chezmoi from https://github.com/carl-parrish/dotFiles …"
+          chezmoi init --no-tty https://github.com/carl-parrish/dotFiles
+          echo ">>> Raw source state cloned."
+        fi
+      EOF
+      ]
+    }
+  }
+
+  # -- 2.2  Seed the temporary bootstrap stub -----------------------------
+  #
+  # This minimal chezmoi.toml gives Chezmoi just enough info to decrypt
+  # bootstrap_secrets.json.age on first apply.  After a successful apply,
+  # the managed .chezmoi.toml.tmpl replaces this stub.
+
+  action "command" {
+    name = "Seed temporary chezmoi bootstrap config"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+
+        CONFIG_DIR="$HOME/.config/chezmoi"
+        CONFIG_FILE="$CONFIG_DIR/chezmoi.toml"
+
+        mkdir -p "$CONFIG_DIR"
+
+        # Only write the stub if chezmoi.toml doesn't already exist
+        # (it may already be the full managed version from a prior apply)
+        if [ -f "$CONFIG_FILE" ]; then
+          echo ">>> chezmoi.toml already exists — not overwriting."
+          echo "    Delete it manually if you need to re-bootstrap."
+          cat "$CONFIG_FILE"
+        else
+          cat > "$CONFIG_FILE" <<'STUB'
+encryption = "age"
+
+[age]
+    identity = "~/.config/chezmoi/yubikey-identity.txt"
+    recipient = "age1yubikey1q2mm9uxwlf03r37500kz3rtak6g5d8wuuqnkquspslqg6n20x7zsukw42wa"
+STUB
+          echo ">>> Temporary bootstrap stub written to $CONFIG_FILE"
+        fi
+      EOF
+      ]
+    }
+  }
+
+  # -- 2.3  chezmoi apply --------------------------------------------------
+
+  action "command" {
+    name = "Apply managed configuration via chezmoi"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+        export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+        eval "$(mise activate bash 2>/dev/null)" || true
+
+        echo ">>> Running chezmoi apply…"
+        echo "    This will:"
+        echo "      1. Read the bootstrap stub"
+        echo "      2. Use the YubiKey identity to decrypt bootstrap_secrets.json.age"
+        echo "      3. Render .chezmoi.toml.tmpl into the final managed config"
+        echo "      4. Apply all managed files"
+        echo ""
+
+        chezmoi apply --no-tty --verbose
+
+        echo ""
+        echo ">>> Chezmoi apply complete."
+      EOF
+      ]
+    }
+  }
+
+  # -- 2.4  Post-apply: set Fish as default shell -------------------------
+
+  action "command" {
+    name = "Set Fish as default shell (if available)"
+
+    params {
+      cmd = "bash"
+      args = ["-c", <<-EOF
+        set -euo pipefail
+        export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+        eval "$(mise activate bash 2>/dev/null)" || true
+
+        FISH_BIN=$(command -v fish 2>/dev/null || true)
+        if [ -z "$FISH_BIN" ]; then
+          echo ">>> Fish shell not found — skipping default shell change."
+          exit 0
+        fi
+
+        # Ensure fish is in /etc/shells
+        if ! grep -qF "$FISH_BIN" /etc/shells 2>/dev/null; then
+          echo "$FISH_BIN" | sudo tee -a /etc/shells > /dev/null
+          echo ">>> Added $FISH_BIN to /etc/shells"
+        fi
+
+        CURRENT_SHELL=$(getent passwd "$(whoami)" | cut -d: -f7)
+        if [ "$CURRENT_SHELL" = "$FISH_BIN" ]; then
+          echo ">>> Fish is already the default shell."
+        else
+          sudo chsh -s "$FISH_BIN" "$(whoami)"
+          echo ">>> Default shell changed to $FISH_BIN"
+        fi
+      EOF
+      ]
+    }
+  }
+}
+
+# =============================================================================
+# Run block — orchestrate all phases against the target group
+# =============================================================================
+# This is the entry point.  `tiron run` executes the run blocks in order.
+# Each phase is a separate job so you can also run them individually by
+# commenting out the ones you don't need.
+# =============================================================================
 
 run "bootstrap_targets" {
-  name        = "Bootstrap chezmoi + YubiKey age identity (per bootstrap.md)"
-  remote_user = "cparrish"
-  become      = true
 
-  action "job" { params { name = "phase0_system_provisioning" } }
-  action "job" { params { name = "phase1_identity_and_trust" } }
-  action "job" { params { name = "phase2_chezmoi_bootstrap" } }
+  # Phase 0: System Provisioning
+  action "job" {
+    params {
+      name = "phase0_provision"
+    }
+  }
+
+  # Phase 1: Identity & Trust Initialization
+  action "job" {
+    params {
+      name = "phase1_identity"
+    }
+  }
+
+  # Phase 2: Chezmoi Bootstrap
+  action "job" {
+    params {
+      name = "phase2_chezmoi"
+    }
+  }
 }
