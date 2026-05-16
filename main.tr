@@ -1,0 +1,241 @@
+group "bootstrap_targets" {
+  host "mint-mini" {
+    target_user = "cparrish"
+
+    # From bootstrap.md (update when you rotate keys)
+    bootstrap_recipient = "age1yubikey1q2mm9uxwlf03r37500kz3rtak6g5d8wuuqnkquspslqg6n20x7zsukw42wa"
+
+    # From your lsusb output on Mint mini (can vary by model)
+    yubikey_vid = "1050"
+    yubikey_pid = "0407"
+
+    # From bootstrap.md
+    dotfiles_repo = "https://github.com/carl-parrish/dotFiles"
+    yubikey_slot  = "1"
+  }
+}
+
+job "phase0_system_provisioning" {
+  # Minimum toolchain boundary + what we learned on Mint/Ubuntu Noble:
+  action "package" {
+    params {
+      name = [
+        "git",
+        "curl",
+        "fish",
+
+        "age",
+
+        # PC/SC + CCID + tooling
+        "pcscd",
+        "libccid",
+        "pcsc-tools",
+        "yubikey-manager",
+
+        # To build age-plugin-yubikey via cargo if needed
+        "pkg-config",
+        "libpcsclite-dev",
+        "build-essential",
+        "cargo"
+      ]
+      state = "present"
+    }
+  }
+
+  # Ensure plugdev group exists + user is in it
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", <<-EOT
+        set -euo pipefail
+        getent group plugdev >/dev/null || groupadd plugdev
+        usermod -aG plugdev "${target_user}"
+      EOT
+      ]
+    }
+  }
+
+  # udev rule so the YubiKey device node is accessible to plugdev
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", <<-EOT
+        set -euo pipefail
+        cat > /etc/udev/rules.d/70-yubikey.rules <<EOF
+        SUBSYSTEM=="usb", ATTR{idVendor}=="${yubikey_vid}", ATTR{idProduct}=="${yubikey_pid}", GROUP="plugdev", MODE="0664"
+        EOF
+        chmod 0644 /etc/udev/rules.d/70-yubikey.rules
+      EOT
+      ]
+    }
+  }
+
+  # polkit rule (pcscd 2.x on Noble uses org.debian.pcsc-lite.* action IDs)
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", <<-EOT
+        set -euo pipefail
+        mkdir -p /etc/polkit-1/rules.d
+        cat > /etc/polkit-1/rules.d/50-pcscd.rules <<'EOF'
+        polkit.addRule(function(action, subject) {
+          if ((action.id == "org.debian.pcsc-lite.access_pcsc" ||
+               action.id == "org.debian.pcsc-lite.access_card") &&
+              subject.isInGroup("plugdev")) {
+            return polkit.Result.YES;
+          }
+        });
+        EOF
+        chmod 0644 /etc/polkit-1/rules.d/50-pcscd.rules
+      EOT
+      ]
+    }
+  }
+
+  # Reload + restart
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", <<-EOT
+        set -euo pipefail
+        udevadm control --reload-rules
+        udevadm trigger
+        systemctl restart polkit || true
+        systemctl restart pcscd
+      EOT
+      ]
+    }
+  }
+
+  # Install age-plugin-yubikey if missing (via cargo)
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", <<-EOT
+        set -euo pipefail
+        if ! command -v age-plugin-yubikey >/dev/null 2>&1; then
+          # Install to the target user's cargo bin
+          su -s /bin/bash - "${target_user}" -c 'cargo install age-plugin-yubikey'
+        fi
+      EOT
+      ]
+    }
+  }
+
+  # Verify YubiKey is visible over CCID as the target user
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", "su -s /bin/bash - ${target_user} -c 'ykman info'"]
+    }
+  }
+}
+
+job "phase1_identity_and_trust" {
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", <<-EOT
+        set -euo pipefail
+
+        # Ensure chezmoi config dir exists for the target user
+        su -s /bin/bash - "${target_user}" -c 'mkdir -p ~/.config/chezmoi'
+
+        # Prefer using existing slot identity; fall back to generate if needed.
+        su -s /bin/bash - "${target_user}" -c "
+          set -euo pipefail
+          if age-plugin-yubikey --identity --slot ${yubikey_slot} > ~/.config/chezmoi/yubikey-identity.txt 2>/dev/null; then
+            exit 0
+          fi
+          age-plugin-yubikey --generate --slot ${yubikey_slot} > ~/.config/chezmoi/yubikey-identity.txt
+        "
+      EOT
+      ]
+    }
+  }
+
+  # Optional: show recipients (matches bootstrap.md discovery)
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", "su -s /bin/bash - ${target_user} -c 'age-plugin-yubikey --list'"]
+    }
+  }
+}
+
+job "phase2_chezmoi_bootstrap" {
+  # Install chezmoi to ~/.local/bin for the target user (README pattern)
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", <<-EOT
+        set -euo pipefail
+        su -s /bin/bash - "${target_user}" -c '
+          mkdir -p ~/.local/bin
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+        '
+      EOT
+      ]
+    }
+  }
+
+  # chezmoi init --no-tty (bootstrap.md)
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", <<-EOT
+        set -euo pipefail
+        su -s /bin/bash - "${target_user}" -c '
+          export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+          chezmoi init --no-tty ${dotfiles_repo}
+        '
+      EOT
+      ]
+    }
+  }
+
+  # Write temporary ~/.config/chezmoi/chezmoi.toml bootstrap stub (bootstrap.md)
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", <<-EOT
+        set -euo pipefail
+        su -s /bin/bash - "${target_user}" -c "
+          cat > ~/.config/chezmoi/chezmoi.toml <<'EOF'
+          encryption = \"age\"
+
+          [age]
+              identity = \"~/.config/chezmoi/yubikey-identity.txt\"
+              recipient = \"${bootstrap_recipient}\"
+          EOF
+        "
+      EOT
+      ]
+    }
+  }
+
+  # Apply (bootstrap.md)
+  action "command" {
+    params {
+      cmd  = "bash"
+      args = ["-lc", <<-EOT
+        set -euo pipefail
+        su -s /bin/bash - "${target_user}" -c '
+          export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+          chezmoi apply
+        '
+      EOT
+      ]
+    }
+  }
+}
+
+run "bootstrap_targets" {
+  name        = "Bootstrap chezmoi + YubiKey age identity (per bootstrap.md)"
+  remote_user = "cparrish"
+  become      = true
+
+  action "job" { params { name = "phase0_system_provisioning" } }
+  action "job" { params { name = "phase1_identity_and_trust" } }
+  action "job" { params { name = "phase2_chezmoi_bootstrap" } }
+}
