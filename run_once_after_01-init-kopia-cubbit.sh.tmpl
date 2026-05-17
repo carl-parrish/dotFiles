@@ -18,7 +18,7 @@ for PASS_FILE in "$KOPIA_DIR"/*.config.kopia-password; do
         
         case "$PROFILE" in
             "repository")
-                kopia --config-file="$CONF_FILE" repository connect s3 --bucket="backup-garage" --endpoint="{{ .secrets.GARAGE_ENDPOINT }}" --access-key="{{ .secrets.GARAGE_KEY_ID }}" --secret-access-key="{{ .secrets.GARAGE_SECRET_KEY }}"
+                kopia --config-file="$CONF_FILE" repository connect s3 --bucket="kopia-backups" --endpoint="{{ .secrets.GARAGE_ENDPOINT }}" --access-key="{{ .secrets.GARAGE_KEY_ID }}" --secret-access-key="{{ .secrets.GARAGE_SECRET_KEY }}"
                 ;;
             "cubbit-vault")
                 kopia --config-file="$CONF_FILE" repository connect s3 --bucket="kopia-backup-mirror" --endpoint="{{ .secrets.CUBBIT_ENDPOINT }}" --access-key="{{ .secrets.CUBBIT_ACCESS_KEY }}" --secret-access-key="{{ .secrets.CUBBIT_SECRET_KEY }}"
