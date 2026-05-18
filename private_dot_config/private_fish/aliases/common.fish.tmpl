@@ -1,132 +1,130 @@
-# --- Navigation & Listing ---
+# =============================================================================
+# --- Navigation, Listing & Modern Tools ---
+# =============================================================================
 alias ll='ls -l'
 alias la='ls -a'
 alias jjl='jj | less'
-
-# --- Modern Tools ---
 alias nv='nvim'
 alias h='atuin search'
-alias bcat='bat -p --paging=never'
-alias bn='bat --style="numbers,header"'
-alias dl='lsd'
-alias hs3="aws --profile garage --endpoint-url https://s3.cuttlefish-gorgon.ts.net s3"
+alias ccd="chezmoi cd" # Kept as alias because it opens a subshell
 
-# --- EZA short cuts ---
-alias ez='eza --icons'
-alias el='eza -lhg --icons'
-alias ea='eza -lha --sort=type --icons --group-directories-first'
-alias et='eza --tree --level=3 --icons'
+# Converted tools to base abbreviations for history tracking and flags
+abbr -a bcat  'bat -p --paging=never'
+abbr -a bn    'bat --style="numbers,header"'
+abbr -a dl    'lsd'
+abbr -a hs3   'aws --profile garage --endpoint-url https://s3.cuttlefish-gorgon'
 
-# --- Chezmoi ---
-# 'chezmoi cd' opens a subshell, so using alias here to distinguish it
-alias ccd="chezmoi cd"
-
-# Abbreviations (Expand on Space/Enter)
-abbr -a cu    'chezmoi update'
-abbr -a ca    'chezmoi apply'
-abbr -a cga   'chezmoi git add'
-abbr -a cgp   'chezmoi git push'
-abbr -a cgl   'chezmoi git pull'
-abbr -a ce    'chezmoi edit --apply'
-abbr -a cdiff 'chezmoi diff'
-abbr -a cgap  'chezmoi git -- add --patch'
-abbr -a cgst  'chezmoi git status'
-abbr -a cgc   'chezmoi git commit'
-abbr -a cgcmsg 'chezmoi git -- commit -m'
-abbr -a cct 'chezmoi chattr +template'
+# EZA Base Shorthand
+abbr -a ez    'eza --icons'
+abbr -a el    'eza -lhg --icons'
+abbr -a ea    'eza -lha --sort=type --icons --group-directories-first'
+abbr -a et    'eza --tree --level=3 --icons'
 
 # Faster fd for dotfile hunting
 abbr -a fa  'fd -HIp'      # Find All (Hidden, Ignored, absolute Path)
 abbr -a fhd 'fd -H'        # Find Hidden
 abbr -a fpd 'fd -p'        # Find Path
 abbr -a fxd 'fd -H -x'     # Find Hidden and Execute (e.g. fxd aerospace.toml cat)
-abbr -a fe  'fd -e'
+abbr -a fde 'fd -e'        # Find by Extension
 
-
-# --- Mise ---
-alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise ls --current --missing"
-alias mdoctor="mise doctor"
-
-abbr -a mug 'mise use -g'
-abbr -a mlg 'mise ls --global'
-
-# --- OpenTofu ---
-abbr -a tf 'tofu'
-
-# --- Git (Converted to Abbreviations for better history) ---
-abbr -a g    'git'
-abbr -a ga   'git add'
-abbr -a gaa  'git add --all'
-abbr -a gap  'git apply'
-abbr -a gapa 'git add --patch'
-abbr -a gc   'git commit -v'
-abbr -a gcb  'git checkout -b'
-abbr -a gcf  'git config --list'
-abbr -a gcm  'git checkout main'
-abbr -a gcmsg 'git commit -m'
-abbr -a gco  'git checkout'
-abbr -a gf   'git fetch'
-abbr -a gfa  'git fetch --all --prune'
-abbr -a gl   'git pull'
-abbr -a grm  'git rm'
-abbr -a rmc  'git rm --cached'
-abbr -a gp   'git push'
-abbr -a gpsup 'git push --set-upstream origin (git branch --show-current)'
-abbr -a gr   'git remote'
-abbr -a gra  'git remote add'
-abbr -a gst  'git status'
-abbr -a gd   'git diff'
-abbr -a gdc  'git diff --cached'
-abbr -a grst 'git restore'
-abbr -a grstp 'git restore -p'
-abbr -a grsts 'git restore --staged'
-abbr -a gsts  'git stash'
-abbr -a gstsp 'git stash pop'
-abbr -a gstsd 'git stash drop'
-abbr -a gstl 'git stash list'
-abbr -a glog   'git log --oneline --graph --decorate --all'
-abbr -a gsh   'git show'
-abbr -a gb     'git branch'
-abbr -a gba    'git branch -a'
-
-
-# --- Git Rebase (Restored) ---
-abbr -a grb  'git rebase'
-abbr -a grba 'git rebase --abort'
-abbr -a grbc 'git rebase --continue'
-abbr -a grbi 'git rebase -i'
-abbr -a grbm 'git rebase main'
-abbr -a grbs 'git rebase --skip'
-
-# --- Kubernetes / Homelab ---
+# =============================================================================
+# --- CORE TOOLS (Base Pre-fixes) ---
+# =============================================================================
+abbr -a g     'git'
+abbr -a cg    'chezmoi git --'
+abbr -a cz    'chezmoi'
+abbr -a cjj   'jj -R (chezmoi source-path)'
 abbr -a k     'kubectl'
-abbr -a kg    'kubectl get'
-abbr -a kgp   'kubectl get pods'
-abbr -a kgn   'kubectl get nodes -o wide'  # Use this a lot to check Tailscale IPs [cite: 690]
-abbr -a kd    'kubectl describe'
-abbr -a klogs 'kubectl logs -f'
-abbr -a kx    'kubectx'                    # Quick switch between contexts (Local vs Prod)
-abbr -a kn    'kubens'                     # Quick switch namespaces (default vs homelab)
+abbr -a tf    'tofu'
+abbr -a goo   'goose'
 
-# --- Pi(agent) ---
+# =============================================================================
+# --- UNIVERSAL SUBCOMMANDS (The Magic Stackers) ---
+# =============================================================================
+# These expand anywhere on the line, bridging Git, Chezmoi, JJ, and Kubectl
+
+# Common Actions
+abbr -a st  -p anywhere 'status'
+abbr -a df  -p anywhere 'diff'
+abbr -a pl  -p anywhere 'pull'
+abbr -a ps  -p anywhere 'push'
+abbr -a lo  -p anywhere 'log'
+abbr -a sh  -p anywhere 'show'
+abbr -a br  -p anywhere 'branch'
+abbr -a fe  -p anywhere 'fetch'
+
+# Commits & Modifiers
+abbr -a cm  -p anywhere 'commit -v'
+abbr -a c   -p anywhere 'commit'
+abbr -a msg -p anywhere -- '-m'
+abbr -a a   -p anywhere 'add'
+abbr -a aa  -p anywhere 'add --all'
+abbr -a ap  -p anywhere 'add --patch'
+abbr -a co  -p anywhere 'checkout'
+abbr -a cob -p anywhere 'checkout -b'
+
+# Kubernetes Verbs (Works perfectly with 'k')
+abbr -a gt  -p anywhere 'get'
+abbr -a d   -p anywhere 'describe'
+abbr -a p   -p anywhere 'pods'
+abbr -a n   -p anywhere 'nodes -o wide'
+
+# Restores & Stashes
+abbr -a rs  -p anywhere 'restore'
+abbr -a rsp -p anywhere 'restore -p'
+abbr -a rss -p anywhere 'restore --staged'
+abbr -a ss  -p anywhere 'stash'
+abbr -a ssp -p anywhere 'stash pop'
+abbr -a ssd -p anywhere 'stash drop'
+abbr -a ssl -p anywhere 'stash list'
+
+# Rebasing
+abbr -a rb  -p anywhere 'rebase'
+abbr -a rba -p anywhere 'rebase --abort'
+abbr -a rbc -p anywhere 'rebase --continue'
+abbr -a rbi -p anywhere 'rebase -i'
+abbr -a rbm -p anywhere 'rebase main'
+abbr -a rbs -p anywhere 'rebase --skip'
+
+# =============================================================================
+# --- Specific Tool Configurations ---
+# =============================================================================
+
+# Chezmoi Specifics (Non-Git)
+abbr -a czu 'chezmoi update'
+abbr -a cza 'chezmoi apply'
+abbr -a cze 'chezmoi edit --apply'
+abbr -a cct 'chezmoi chattr +template'
+
+# Git Complex/Edge Cases
+abbr -a gfa   'git fetch --all --prune'
+abbr -a grm   'git rm'
+abbr -a rmc   'git rm --cached'
+abbr -a gpsup 'git push --set-upstream origin (git branch --show-current)'
+abbr -a glog  'git log --oneline --graph --decorate --all'
+alias gwip='git add -A; git rm (git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
+
+# Kubernetes Contexts
+abbr -a klogs 'kubectl logs -f'
+abbr -a kx    'kubectx'   # Quick switch between contexts (Local vs Prod)
+abbr -a kn    'kubens'    # Quick switch namespaces (default vs homelab)
+
+# Mise
+alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise doctor"
+abbr -a mug   'mise use -g'
+abbr -a mlg   'mise ls --global'
+
+# Pi Agents
 abbr -a bigpi 'pi --model opencode/big-pickle'
 abbr -a gempi 'pi --model google/gemini-2.5-pro'
 
-# Complex Git Aliases (Keep as Alias because they contain logic/pipes )
-alias gwip='git add -A; git rm (git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
-# --- Infisical (The Keymaster) ---
-{{- if eq .hostname "raspberrypi" }}
-abbr -a ir   'infisical run --projectId $INFISICAL_PROJECT_ID --env dev --'
-abbr -a irp  'infisical run --projectId $INFISICAL_PROJECT_ID --env prod --'
-{{- else }}
-abbr -a ir   'infisical run --env dev --'
-abbr -a irp  'infisical run --env prod --'
-{{- end }}
-abbr -a is   'infisical secrets'
-abbr -a iss  'infisical secrets set'
+# Infisical
+abbr -a ir    'infisical run --env dev --'
+abbr -a irp   'infisical run --env prod --'
+abbr -a is    'infisical secrets'
+abbr -a iss   'infisical secrets set'
 abbr -a ir-psql 'infisical run --env dev -- sh -c "PGPASSWORD=\$POSTGRES_PASSWORD psql -U admin -h pgsql"'
 
-# --- The Brain ---
-abbr -a cdn  'cd ~/notes'
-abbr -a gn   'grep -rni . ~/notes -e' 
-abbr -a goo  'goose'
+# The Brain
+abbr -a cdn   'cd ~/notes'
+abbr -a gn    'grep -rni . ~/notes -e'

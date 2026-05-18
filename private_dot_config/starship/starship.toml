@@ -1,14 +1,12 @@
-command_timeout = 5000
 palette = 'gruvbox_dark'
 
 format = """
 [](color_orange)\
 $os\
+$hostname\
 $directory\
-[](bg:color_yellow fg:color_orange)\
 $git_branch\
 $git_status\
-[](fg:color_yellow bg:color_aqua)\
 ${custom.jj}\
 [](fg:color_aqua bg:color_blue)\
 $fill\
@@ -27,9 +25,20 @@ $cmd_duration\
 [ ](fg:color_bg1)\
 $line_break$character"""
 
+[os]
+disabled = false
+style = "bg:color_orange fg:color_fg0"
+
+[hostname]
+ssh_only = false
+style = "bg:color_orange fg:color_fg0"
+# This adds a small separator so your host name doesn't mash right into the directory path
+format = "[@$hostname ]($style)"
+
 [directory]
 style = "bg:color_orange fg:color_fg0"
-format = "[ $path ]($style)"
+# Matches the background of the host block, then draws the clean transition arrow to aqua
+format = "[ $path ]($style)[](fg:color_orange bg:color_aqua)"
 truncation_length = 3
 truncation_symbol = "…/"
 truncate_to_repo = false
@@ -51,9 +60,6 @@ color_purple = '#b16286'
 color_red = '#cc241d'
 color_yellow = '#d79921'
 
-[os]
-disabled = false
-style = "bg:color_orange fg:color_fg0"
 
 [os.symbols]
 Windows = "󰍲"
@@ -87,14 +93,12 @@ Pop = ""
 "Music" = " "
 "Pictures" = " "
 
+# --- Native Git: Turned off so jj-starship handles everything safely ---
 [git_branch]
-symbol = ""
-style = "bg:color_aqua"
-format = '[on](white) [[ $symbol $branch ](fg:color_fg0 bg:color_aqua)]($style)'
+disabled = true
 
 [git_status]
-style = "bg:color_aqua"
-format = '[[($all_status$ahead_behind )](fg:color_fg0 bg:color_aqua)]($style)'
+disabled = true
 
 [nodejs]
 symbol = ""
@@ -135,11 +139,8 @@ format = '[$symbol]($style)'
 [cmd_duration]
 min_time = 500
 style = 'fg:gray'
-format = '[$duration]($style)'
 
 [custom.jj]
-command = '''starship-jj --ignore-working-copy starship prompt'''
-style = "bg:color_aqua"
-format = "[$symbol $bookmark](fg:color_fg0 bg:color_agua)($style) "
-symbol = ""
-when = "jj root --ignore-working-copy"
+when = "jj-starship detect"
+shell = ["jj-starship"]
+format = "$output "

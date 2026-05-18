@@ -92,6 +92,9 @@ if status is-interactive
 
     # 4. Zoxide
     if type -q zoxide
+        # Configure fzf options specifically for interactive zoxide selection
+        set -gx ZOXIDE_INTERACTIVE_CMD "fzf --height 50% --reverse --inline-info \
+         --preview 'eza --tree --level=2 --color=always --icons {} | head -30'"
         zoxide init fish | source
         function cd
             if test (count $argv) -eq 0
