@@ -3,9 +3,19 @@
 {{- $decrypted := include "bootstrap_secrets.json.age" | decrypt -}}
 {{- $cleaned := $decrypted | replaceAllRegex "\x1b\\[[0-9;]*[a-zA-Z]" "" | replaceAllRegex "\x1b" "" | trim -}}
 {{- $bootstrap := $cleaned | fromJson -}}
-{{- $loginToken := output "infisical" "login" "--method=universal-auth" "--client-id" $bootstrap.clientId "--client-secret" $bootstrap.clientSecret "--domain" $bootstrap.domain "--plain" "--silent" | trim -}}
+
+{{- /* Handle Domain Switching */ -}}
+{{- $infisicalBin := "infisical" -}}
+{{- $domain := $bootstrap.domain -}}
+
+{{- if eq $realHostname "raspberrypi" -}}
+  {{- $infisicalBin = "/home/cparrish/.local/bin/infisical" -}}
+  {{- $domain = "http://127.0.0.1:8081" -}}
+{{- end -}}
+
+{{- $loginToken := output $infisicalBin "login" "--method=universal-auth" "--client-id" $bootstrap.clientId "--client-secret" $bootstrap.clientSecret "--domain" $domain "--plain" "--silent" | trim -}}
 {{- $secrets := dict -}}
-{{- $rawJSON := output "infisical" "export" "--env" "dev" "--projectId" $bootstrap.projectId "--token" $loginToken "--domain" $bootstrap.domain "--format" "json" "--silent" | trim -}}
+{{- $rawJSON := output $infisicalBin "export" "--env" "dev" "--projectId" $bootstrap.projectId "--token" $loginToken "--domain" $domain "--format" "json" "--silent" | trim -}}
 {{- range ($rawJSON | fromJson) -}}
     {{- $_ := set $secrets .key .value -}}
 {{- end -}}
