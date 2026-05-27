@@ -1,11 +1,11 @@
 {
-  "providers": {
     "opencode": {
+      "type": "api_key",
       "key": {{ .secrets.OPENCODE_API_KEY | quote }}
     },
     "google": {
+      "type": "api_key",
       "key": {{ .secrets.GEMINI_API_KEY | quote }},
       "projectId": "causal-shell-426900-m9"
     }
-  }
 }
