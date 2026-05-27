@@ -1,7 +1,7 @@
 [tools]
 # --- Core Languages ---
 go = "1.25.4"
-node = "20"
+node = "22.19.0"
 python = "3.12"
 ruby = "3.3"
 rust = "1.92.0"
@@ -31,8 +31,7 @@ minikube = "1.33.1"
 "npm:typescript" = "latest"
 "npm:@google/gemini-cli" = "latest"
 "npm:@bitwarden/cli" = "latest"
-"npm:@earendil-works/pi-coding-agent" = "latest"
-"npm:pi-opencode" = "latest"       # The provider extension specifically for Pi-agent
+"npm:@earendil-works/pi-coding-agent" = "0.75.3"
 
 {{- if ne .chezmoi.os "darwin" }}
 # Generic MCP Cron for Linux nodes (avoids EBADPLATFORM)
