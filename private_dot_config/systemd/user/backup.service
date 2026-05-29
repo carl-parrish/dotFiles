@@ -1,0 +1,12 @@
+[Unit]
+Description=Sovereign Node Scheduled Backup Task
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Zero hardcoded paths. %h automatically scales across different usernames/hosts.
+ExecStart=%h/.local/bin/mise exec -- /opt/scripts/backup-node.fish
+
+[Install]
+WantedBy=timers.target
