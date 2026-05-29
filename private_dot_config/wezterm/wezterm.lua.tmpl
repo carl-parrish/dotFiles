@@ -21,6 +21,13 @@ local nu_bin = home_dir .. "/.local/share/mise/shims/nu"
 fish_bin = "/opt/homebrew/bin/fish"
 config.front_end = 'WebGpu'
 config.default_prog = { "arch", "-arm64", fish_bin, "-l" }
+config.font_size = 14.0
+config.window_padding = {
+        left = 10,
+        right = 5,
+        top = 5,
+        bottom = 5,
+}
 {{ else -}}
 -- Linux/Chromebook Specifics
 config.default_prog = { fish_bin, "-l" }
