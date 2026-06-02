@@ -1,7 +1,7 @@
 [tools]
 # --- Core Languages ---
 go = "1.25.4"
-node = "22.19.0"
+node = "22.21.0"
 python = "3.12"
 ruby = "3.3"
 rust = "1.92.0"
@@ -31,7 +31,8 @@ minikube = "1.33.1"
 "npm:typescript" = "latest"
 "npm:@google/gemini-cli" = "latest"
 "npm:@bitwarden/cli" = "latest"
-"npm:@earendil-works/pi-coding-agent" = "0.75.3"
+"npm:@earendil-works/pi-coding-agent" = "latest"
+"npm:@a5c-ai/babysitter-sdk" = "0.0.187"
 
 {{- if ne .chezmoi.os "darwin" }}
 # Generic MCP Cron for Linux nodes (avoids EBADPLATFORM)
@@ -68,6 +69,7 @@ minikube = "1.33.1"
 "cargo:spec-kit-mcp" = "latest"
 "cargo:jj-starship" = "latest"
 "cargo:scm-diff-editor" = "latest"
+"cargo:presenterm" = "latest"
 
 # --- Universal Binaries (Fast Install) ---
 # --- GitHub Binaries ---

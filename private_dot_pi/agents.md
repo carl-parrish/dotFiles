@@ -98,24 +98,88 @@ When an agent needs to schedule tasks, avoid giving sudo. Use these alternatives
 When answering questions about data from notes or research:
 
 1. **Always check SurrealDB first** before grepping local files
-2. Use WebSocket query via surreal CLI with infisical injection:
+
+### Connection Details
+
+| Field | Value |
+|-------|-------|
+| Endpoint | `wss://surrealdb.cuttlefish-gorgon.ts.net:443` (WebSocket ONLY) |
+| HTTP API | `https://surrealdb.cuttlefish-gorgon.ts.net/sql` (has empty results bug in v3) |
+| Credentials | `SURREALDB_USER` / `SURREALDB_PASSWORD` from Infisical secrets |
+| Namespace | `default` (NOT `main` - compose file is server-side, agents.md is correct) |
+| Database | `homestead` |
+
+### SurrealDB v3 Docs
+
+- **SQL Reference**: https://surrealdb.com/docs/surrealql
+- **DEFINE TABLE**: https://surrealdb.com/docs/surrealql/statements/define/table
+- **DEFINE FIELD**: https://surrealdb.com/docs/surrealql/statements/define/field
+- **CREATE**: https://surrealdb.com/docs/surrealql/statements/create
+- **SELECT**: https://surrealdb.com/docs/surrealql/statements/select
+- **UPDATE / MERGE**: https://surrealdb.com/docs/surrealql/statements/update
+
+### Query Syntax (SurrealDB v3.x)
+
+SurrealDB v3 has different syntax than v2. Key differences:
+
+- **`DEFINE TABLE ... PERMISSIONS FULL`** — not `PERMISSIONS WHERE true` or `PERMISSIONS FOR select WHERE true`
+- **`DEFINE FIELD IF NOT EXISTS`** — note: `IF NOT EXISTS` is optional, works without it
+- **`CREATE table CONTENT {...}`** — use `{ }` not `( )`
+- **Double quotes** for strings inside CONTENT blocks (SurrealQL object keys use double quotes)
+- **No `--file` flag** in this version — pipe input instead via `cat file | surreal sql`
+- **Multi-statement files work** — separate with `;`, results come per-query
+
+### Workflow (DO THIS EVERY TIME)
 
 ```bash
-infisical run --env dev --silent -- sh -c 'echo "SELECT <fields> FROM <table>" | surreal sql -e "wss://surrealdb.cuttlefish-gorgon.ts.net:443" -u "$SURREALDB_USER" -p "$SURREALDB_PASSWORD" --ns default --db homestead --pretty --hide-welcome'
+# Read query:
+infisical run --env dev --silent -- sh -c 'echo "SELECT * FROM table;" | surreal sql -e "wss://surrealdb.cuttlefish-gorgon.ts.net:443" -u "$SURREALDB_USER" -p "$SURREALDB_PASSWORD" --ns default --db homestead --pretty --hide-welcome'
+
+# Write migration from file:
+infisical run --env dev --silent -- sh -c 'cat path/to/file.surql | surreal sql -e "wss://surrealdb.cuttlefish-gorgon.ts.net:443" -u "$SURREALDB_USER" -p "$SURREALDB_PASSWORD" --ns default --db homestead --pretty --hide-welcome'
 ```
 
-### SurrealDB Connection
+### Auth Flow (CRITICAL - DON'T WORK AROUND)
 
-- **Endpoint**: `wss://surrealdb.cuttlefish-gorgon.ts.net:443` (WebSocket)
-- **HTTP**: `https://surrealdb.cuttlefish-gorgon.ts.net/sql` (has empty results bug in 3.0.5)
-- **User/Pass**: From infisical `SURREALDB_USER`, `SURREALDB_PASSWORD`
-- **Namespace**: `default`
-- **Database**: `homestead`
+1. Infisical session is required — `infisical run` must work
+2. If `infisical run` says "No valid login session found":
+   - **ASK the user to login** — do NOT try to work around it
+   - Do NOT unset `INFISICAL_DISABLE_KEYRING` — it's set for a reason
+   - Do NOT try to extract tokens from keychain
+   - Do NOT try to decrypt SOPS files directly (requires YubiKey hardware)
+3. When session is active, `infisical run` injects ~63 secrets into the subprocess
+4. The user's alias is `ir` = `infisical run --env dev --`
 
-### Known Issues
+### Common Pitfalls
 
-- HTTP `/sql` endpoint returns `{"status":"OK"}` with empty results - use WebSocket instead
-- xh adds Accept header that causes 400 error - use `Accept:` (empty) or curl
+| Mistake | Why |
+|---------|-----|
+| Using `--ns main` | That's the server config, not the data namespace — use `default` |
+| Using `--file` flag | Not supported in this surreal version — pipe stdin instead |
+| Unsetting `INFISICAL_DISABLE_KEYRING` | Deliberately set to avoid keychain issues |
+| Trying to decrypt `.env` with SOPS | Requires YubiKey plugged in + SSH key — just ask for Infisical login |
+| Using HTTP `/sql` endpoint | Returns empty results in v3.0.5 — always use WebSocket |
+| Using `PERMISSIONS WHERE true` | v3 requires `PERMISSIONS FULL` or `PERMISSIONS FOR select WHERE ...` |
+
+### Known Databases
+
+Currently two databases exist in SurrealDB:
+- **`homestead`** — general notes, research, agent data
+- **`homelab`** — infrastructure audit, tasks, ops records
+
+If unsure which to use, check available databases first:
+```bash
+infisical run --env dev --silent -- sh -c 'echo "INFO FOR DB;" | surreal sql -e "wss://surrealdb.cuttlefish-gorgon.ts.net:443" -u "$SURREALDB_USER" -p "$SURREALDB_PASSWORD" --ns default --pretty --hide-welcome'
+```
+Then ask if the intent isn't clear from context.
+
+### When to Ask the User
+
+- **Infisical session expired** → "Can you re-login to Infisical? `infisical login`"
+- **Need to create/modify schema** → Write a `.surql` file first, ask before running
+- **SOPS decryption fails** → "This needs your YubiKey — can you plug it in?"
+- **Unsure about credentials** → Ask, don't hunt through files
+- **Unsure which database to use** → Ask before querying
 
 ## Fish Aliases (from ~/.config/fish/aliases/common.fish)
 
@@ -202,6 +266,13 @@ Key tools available via mise (run `mcheck` to see full list):
 - **Privacy:** Disable all telemetry/anonymous data collection
 - **Shell Output:** Use `printf` over `echo` for special characters
 - **Methodology:** Speckit for breaking down complex tasks
+
+## Communication Rules
+
+1. **Ask before acting** — if unsure what to do or which database/service to target, ask first
+2. **Reading is free** — reading files, listing directories, searching code is always fine without asking
+3. **Changing requires confirmation** — before editing files, setting env vars, running destructive commands, or creating resources, ask
+4. **Don't assume the database** — check available databases first, then ask if the intent isn't clear from context
 
 ## Node Backup Strategy
 

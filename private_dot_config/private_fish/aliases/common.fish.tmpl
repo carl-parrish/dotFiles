@@ -92,8 +92,8 @@ abbr -a rbs -p anywhere 'rebase --skip'
 
 # Chezmoi Specifics (Non-Git)
 abbr -a czu 'chezmoi update'
-abbr -a cza 'chezmoi apply'
-abbr -a cze 'chezmoi edit --apply'
+abbr -a cza 'chezmoi apply --verbose'
+abbr -a cze 'chezmoi edit'
 abbr -a cct 'chezmoi chattr +template'
 
 # Git Complex/Edge Cases
@@ -110,13 +110,15 @@ abbr -a kx    'kubectx'   # Quick switch between contexts (Local vs Prod)
 abbr -a kn    'kubens'    # Quick switch namespaces (default vs homelab)
 
 # Mise
-alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise doctor"
+alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---'; mise ls --current --missing"
+alias mdoctor="mise doctor"
 abbr -a mug   'mise use -g'
 abbr -a mlg   'mise ls --global'
 
 # Pi Agents
 abbr -a bigpi 'pi --model opencode/big-pickle'
 abbr -a gempi 'pi --model google/gemini-2.5-pro'
+abbr -a mina 'pi --model ollama/gemma4'
 
 # Infisical
 abbr -a ir    'infisical run --env dev --'
