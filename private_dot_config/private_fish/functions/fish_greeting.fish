@@ -12,7 +12,8 @@ function fish_greeting
         "The best way to avenge yourself is to not be like that. (Marcus Aurelius)" \
         "The journey of a thousand miles begins with a single step. (Lao Tzu)" \
         "It is not death that a man should fear, but he should fear never beginning to live. (Marcus Aurelius)" \
-        "Assembly of Japanese bicycle require great peace of mind. (Robert Pirsig)"
+        "Assembly of Japanese bicycle require great peace of mind. (Robert Pirsig)" \
+        "Sufficient unto the day is the evil thereof. (Matthew 6:34)" \
 
     # Randomly pick one (Works in Fish 4.x)
     set -l index (random 1 (count $quotes))
