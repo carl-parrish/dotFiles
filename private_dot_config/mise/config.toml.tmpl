@@ -25,15 +25,16 @@ minikube = "1.33.1"
 "cargo:btop" = "latest"
 {{- end }}
 
-
 # --- Node Packages ---
 "npm:pnpm" = "latest"
-"npm:typescript" = "latest"
+#"npm:typescript" = "latest"
+"npm:typescript" = "7.0.1-rc"
 "npm:@google/gemini-cli" = "latest"
 "npm:@bitwarden/cli" = "latest"
 "npm:@earendil-works/pi-coding-agent" = "latest"
 "npm:@a5c-ai/babysitter-sdk" = "0.0.187"
 "npm:clerk" = "latest"
+
 
 {{- if ne .chezmoi.os "darwin" }}
 # Generic MCP Cron for Linux nodes (avoids EBADPLATFORM)
@@ -71,6 +72,8 @@ minikube = "1.33.1"
 "cargo:jj-starship" = "latest"
 "cargo:scm-diff-editor" = "latest"
 "cargo:presenterm" = "latest"
+"cargo:tuicr" = "latest" 
+"cargo:lumen" = "latest"
 
 # --- Python Tools (Isolated via Pipx) ---
 uv = "latest"

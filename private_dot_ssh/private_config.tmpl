@@ -46,10 +46,14 @@ Host github.com gitlab.com
 Host pi
   HostName pi
   User cparrish
+  IdentityFile ~/.ssh/keys/active/homelab
+  IdentitiesOnly yes
 
 Host mint-mini
   HostName mint-mini
   User cparrish
+  IdentityFile ~/.ssh/keys/active/homelab
+  IdentitiesOnly yes
 
 Host mac-mini
   HostName mac-mini
