@@ -19,11 +19,15 @@ set -gx INFISICAL_API_URL "https://secrets.cuttlefish-gorgon.ts.net"
 # 4. Machine Identity Authentication (Pi Only)
 {{- if $is_pi }}
 if status is-interactive
-    if not set -q INFISICAL_TOKEN
+    if test -z "$INFISICAL_TOKEN"
         set -gx INFISICAL_TOKEN (infisical login --method=universal-auth \
             --client-id="{{ .infisical.clientId }}" \
             --client-secret="{{ .infisical.clientSecret }}" \
             --plain --silent)
+
+        if test $status -eq 0 -a -n "$token"
+            set -gx INFISICAL_TOKEN "$token"
+        end
     end
 end
 
