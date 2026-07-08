@@ -8,6 +8,7 @@ function ifx --description "Run a command with Infisical secrets"
     end
 
     infisical run \
+        --silent \
         --env "$env_name" \
         --projectId "$INFISICAL_PROJECT_ID" \
         -- $cmd
