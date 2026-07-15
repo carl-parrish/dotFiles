@@ -34,9 +34,18 @@ abbr -a g     'git'
 abbr -a cg    'chezmoi git --'
 abbr -a cz    'chezmoi'
 abbr -a cjj   'jj -R (chezmoi source-path)'
+abbr -a jw    'jjw'
 abbr -a k     'kubectl'
 abbr -a tf    'tofu'
 abbr -a goo   'goose'
+
+# =============================================================================
+# --- Native Jujutsu Workspaces (Decoupled & Pure) ---
+# =============================================================================
+abbr -a jwl   'jj workspace list'
+abbr -a jwa   -p command --set-cursor -- 'jj workspace add workspaces/%'
+abbr -a jwf   -p command --set-cursor -- 'jj workspace forget %'
+abbr -a jwa -p command -- 'cd (jj workspace list | rg -o "agent.*: (.*)" -r \'$1\')'
 
 # =============================================================================
 # --- UNIVERSAL SUBCOMMANDS (The Magic Stackers) ---
@@ -64,6 +73,10 @@ abbr -a aa  -p anywhere 'add --all'
 abbr -a ap  -p anywhere 'add --patch'
 abbr -a co  -p anywhere 'checkout'
 abbr -a cob -p anywhere 'checkout -b'
+abbr -a -p anywhere -- -ap '--all --prune' #Use with `g ft -ap` for `git fetch --all --prune`
+abbr -a -p anywhere -- -rmc 'rm --cached' #Use with `g -rmc` for `git rm --cached`
+
+
 
 # Kubernetes Verbs (Works perfectly with 'k')
 abbr -a gt  -p anywhere 'get'
@@ -107,8 +120,7 @@ abbr -a trf   'tiron fmt'
 # Git Complex/Edge Cases
 abbr -a gfa   'git fetch --all --prune'
 abbr -a grm   'git rm'
-abbr -a rmc   'git rm --cached'
-abbr -a gpsup 'git push --set-upstream origin (git branch --show-current)'
+abbr -a g_push_upstream -p anywhere -r '^up$' -- 'origin (test -d .jj; and jj bookmark list -r @ | awk "{print \$1}"; or git branch --show-current) --set-upstream' #Use `g ph up` for `git push <branch name> --set-uprsteam`
 abbr -a glog  'git log --oneline --graph --decorate --all'
 alias gwip='git add -A; git rm (git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 

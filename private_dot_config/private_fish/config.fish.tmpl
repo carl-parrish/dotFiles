@@ -90,7 +90,12 @@ if status is-interactive
         starship init fish | source
     end
 
-    # 4. Zoxide
+    # 4. Jujutsu Workspace Manager (jjw)
+    #if type -q jjw
+    #    jjw init fish | source
+    #end
+
+    # 5. Zoxide
     if type -q zoxide
         # Configure fzf options specifically for interactive zoxide selection
         set -gx ZOXIDE_INTERACTIVE_CMD "fzf --height 50% --reverse --inline-info \
@@ -99,14 +104,49 @@ if status is-interactive
         function cd
             if test (count $argv) -eq 0
                 builtin cd $HOME
-            else
-                z $argv 2>/dev/null; or builtin cd $argv
+                return
+            end
+
+            # 1. Determine where zoxide *would* send us if we run 'z argv'
+            set -l target (zoxide query --exclude "$PWD" -- $argv 2>/dev/null)
+
+            if test -n "$target"
+                # 2. See if we are in a Git/Jujutsu repository
+                set -l current_root (git rev-parse --show-toplevel 2>/dev/null)
+                
+                if test -n "$current_root"
+                    # 3. See if the target destination is also in a repository
+                    set -l target_root (git -C "$target" rev-parse --show-toplevel 2>/dev/null)
+
+                    if test -n "$target_root"
+                        # 4. Check if both directories share the same underlying repository database
+                        set -l current_common (git rev-parse --absolute-git-dir 2>/dev/null)
+                        set -l target_common (git -C "$target" rev-parse --absolute-git-dir 2>/dev/null)
+
+                        if test "$current_common" = "$target_common"
+                            # 5. Rewrite target path to stay inside our active workspace
+                            set -l relative_path (string replace -r "^$target_root/?" "" $target)
+                            set -l local_target "$current_root/$relative_path"
+
+                            # If that folder exists in our current workspace, redirect there!
+                            if test -d "$local_target"
+                                set target "$local_target"
+                            end
+                        end
+                    end
+                end
+
+                builtin cd $target; and zoxide add $PWD
+                else
+                # Fall back to standard builtin cd if zoxide has no match
+                builtin cd $argv
             end
         end
     end
 
-    # 5. Vi key bindings
-    fish_vi_key_bindings
+
+  # 6. Vi key bindings
+  fish_vi_key_bindings
 end
 
 # =========================
