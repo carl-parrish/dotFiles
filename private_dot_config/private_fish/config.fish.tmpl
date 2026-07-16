@@ -120,8 +120,8 @@ if status is-interactive
 
                     if test -n "$target_root"
                         # 4. Check if both directories share the same underlying repository database
-                        set -l current_common (git rev-parse --absolute-git-dir 2>/dev/null)
-                        set -l target_common (git -C "$target" rev-parse --absolute-git-dir 2>/dev/null)
+                        set -l current_common (git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+                        set -l target_common (git -C "$target" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
 
                         if test "$current_common" = "$target_common"
                             # 5. Rewrite target path to stay inside our active workspace

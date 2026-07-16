@@ -45,7 +45,7 @@ abbr -a goo   'goose'
 abbr -a jwl   'jj workspace list'
 abbr -a jwa   -p command --set-cursor -- 'jj workspace add workspaces/%'
 abbr -a jwf   -p command --set-cursor -- 'jj workspace forget %'
-abbr -a jwa -p command -- 'cd (jj workspace list | rg -o "agent.*: (.*)" -r \'$1\')'
+abbr -a jws -p command -- 'cd (jj workspace list | rg -o "agent.*: (.*)" -r \'$1\')'
 
 # =============================================================================
 # --- UNIVERSAL SUBCOMMANDS (The Magic Stackers) ---
