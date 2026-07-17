@@ -1,23 +1,20 @@
 {
-  "surreal-specter": {
-    "command": "npx",
-    "args": ["-y", "@surrealdb/specter", "server"],
-    "env": {
-      "SURREAL_URL": "https://surrealdb.cuttlefish-gorgon.ts.net",
-      "SURREAL_USER": "cparrish",
-      "SURREAL_PASS": {{ .secrets.SURREALDB_PASSWORD | quote }}
+  "mcpServers": {
+    "surrealdb": {
+      "url": "https://surrealdb.cuttlefish-gorgon.ts.net/mcp",
+      "headers": {
+        "Host": "127.0.0.1:8000",
+        "Authorization": "Bearer {{ .secrets.SURREAL_MCP_AUTH_TOKEN }}"
+      }
+    },
+    "forgejo": {
+      "url": "https://forgejo-mcp.cuttlefish-gorgon.ts.net/sse",
+      "headers": {
+        "Autorizatin": "Bearer {{ .secrets.FORGEJO_AGENT_PAT }}"
+      }
+    },
+    "plane": {
+      "url": "https://mcp.plane.so/http/mcp"
     }
-  },
-  "mcp-cron": {
-    "command": "mcp-cron-{{ .chezmoi.os }}-{{ .chezmoi.arch }}",
-    "args": [],
-    "env": {}
-  },
-  "forgejo": {
-  "command": "forgejo-mcp",
-  "args": ["stdio", "--url", "https://git.deeplydigital.net"],
-  "env": {
-    "FORGEJO_ACCESS_TOKEN": {{ .secrets.FORGEJO_AGENT_PAT | quote }}
   }
- }
 }

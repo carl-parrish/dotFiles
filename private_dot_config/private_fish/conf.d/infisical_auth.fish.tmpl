@@ -20,12 +20,13 @@ set -gx INFISICAL_API_URL "https://secrets.cuttlefish-gorgon.ts.net"
 {{- if $is_pi }}
 if status is-interactive
     if test -z "$INFISICAL_TOKEN"
-        set -gx INFISICAL_TOKEN (infisical login --method=universal-auth \
+        set -l token (infisical login --method=universal-auth \
             --client-id="{{ .infisical.clientId }}" \
             --client-secret="{{ .infisical.clientSecret }}" \
             --plain --silent)
 
-        if test $status -eq 0 -a -n "$token"
+        if test $status -eq 0
+          and test -n "$token"
             set -gx INFISICAL_TOKEN "$token"
         end
     end
