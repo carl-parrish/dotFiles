@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "surrealdb": {
+      "url": "https://surrealdb.cuttlefish-gorgon.ts.net/mcp",
+      "headers": {
+        "Host": "127.0.0.1:8000",
+        "Authorization": "Basic {{ .secrets.SURREAL_MCP_AUTH_TOKEN }}"
+      }
+    },
+    "forgejo": {
+      "url": "https://forgejo-mcp.cuttlefish-gorgon.ts.net/sse",
+      "headers": {
+        "Authorization": "Bearer {{ .secrets.FORGEJO_AGENT_PAT }}"
+      }
+    },
+     "plane": {
+      "command": "npx",
+      "args": [
+        "mcp-remote@latest",
+        "https://mcp.plane.so/http/api-key/mcp"
+      ],
+      "env": {
+        "MCP_REMOTE_HEADER_AUTHORIZATION": "Bearer {{ .secrets.PLANE_PAT }}",
+        "MCP_REMOTE_HEADER_X_WORKSPACE_SLUG": "deeplydigital"
+      }
+    }
+  }
+}
