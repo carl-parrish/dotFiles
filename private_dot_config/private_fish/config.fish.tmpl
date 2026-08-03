@@ -29,7 +29,16 @@ set -gx MISE_DATA_DIR $HOME/.local/share/mise
 set -gx MISE_CONFIG_DIR $HOME/.config/mise
 set -gx MISE_CACHE_DIR $HOME/.cache/mise
 
+# NAS location
+set -gx NAS_DIR "/Volumes"
+{{- else if $is_chromebook }}
+# Fallback local directory on Chromebook until Garage S3 sync is live
+set -gx NAS_DIR "$HOME/Documents/nas_sync"
+{{- else }}
+set -gx NAS_DIR "/mnt/nas"
+
 {{- end }}
+
 
 
 # =========================
