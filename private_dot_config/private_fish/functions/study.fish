@@ -1,10 +1,29 @@
 function study --description "Sync DB with Turso, launch Flashy TUI, and push state back on exit"
-    if test (count $argv) -eq 0
-        echo "Error: Please specify a deck name."
-        echo "Usage: study <deck-name>"
-        return 1
-    end
+  #if test (count $argv) -eq 0
+  #      echo "Error: Please specify a deck name."
+  #      echo "Usage: study <deck-name>"
+  #      return 1
+  #  end
 
+    # If no argument, fzf-pick from available decks
+    if test (count $argv) -eq 0
+        set -l decks_dir "$NAS_DIR/Documents/study/flashy"
+        
+        # Check if any .toml files actually exist to avoid glob errors
+        set -l files $decks_dir/*.toml
+        if test -e "$files[1]"
+            set deck_name (string replace -r '.*/(.*)\.toml$' '$1' $files \
+                | fzf --prompt="Select a deck: " --height=40% --border)
+        else
+            echo "Error: No decks found in $decks_dir"
+            return 1
+        end
+
+        if test -z "$deck_name"
+            echo "No deck selected."
+            return 0
+        end
+    end
     set -l deck_name $argv[1]
     set -l deck_file "$NAS_DIR/Documents/study/flashy/$deck_name.toml"
     set -l db_dir "$HOME/.local/share/flashy"
