@@ -1,19 +1,23 @@
 function study --description "Sync DB with Turso, launch Flashy TUI, and push state back on exit"
-  #if test (count $argv) -eq 0
-  #      echo "Error: Please specify a deck name."
-  #      echo "Usage: study <deck-name>"
-  #      return 1
-  #  end
+    set -l deck_name $argv[1]
+    set -l decks_dir "$NAS_DIR/Documents/study/flashy"
 
-    # If no argument, fzf-pick from available decks
-    if test (count $argv) -eq 0
-        set -l decks_dir "$NAS_DIR/Documents/study/flashy"
+    # If no argument passed, interactive fzf pick
+    if test -z "$deck_name"
+        # Use path filter safely without throwing Fish wildcard errors
+        set -l files (path filter "$decks_dir"/*.toml 2>/dev/null)
         
-        # Check if any .toml files actually exist to avoid glob errors
-        set -l files $decks_dir/*.toml
-        if test -e "$files[1]"
+        if test (count $files) -gt 0
             set deck_name (string replace -r '.*/(.*)\.toml$' '$1' $files \
-                | fzf --prompt="Select a deck: " --height=40% --border)
+                | fzf --prompt="Select a deck: " --height=50% --border \
+                      --preview "echo '📖 Description:'; \
+                                 rg -oP 'description = \"\K[^\"]+' $decks_dir/{}.toml || echo 'No description'; \
+                                 echo ''; \
+                                 echo -n '🎴 Cards: '; rg -c '^\[\[decks\.cards\]\]' $decks_dir/{}.toml 2>/dev/null || echo '0'; \
+                                 echo ''; \
+                                 echo '--- First Question Preview ---'; \
+                                 rg -UoP 'q = \"\"\"\n\K[\s\S]*?(?=\n\"\"\")' $decks_dir/{}.toml \
+                                   | sed '/^\s*\$/d' | head -n 6")
         else
             echo "Error: No decks found in $decks_dir"
             return 1
@@ -24,8 +28,8 @@ function study --description "Sync DB with Turso, launch Flashy TUI, and push st
             return 0
         end
     end
-    set -l deck_name $argv[1]
-    set -l deck_file "$NAS_DIR/Documents/study/flashy/$deck_name.toml"
+
+    set -l deck_file "$decks_dir/$deck_name.toml"
     set -l db_dir "$HOME/.local/share/flashy"
     set -l db_path "$db_dir/flashy.db"
     set -l turso_db "flash-cards"
@@ -37,7 +41,7 @@ function study --description "Sync DB with Turso, launch Flashy TUI, and push st
     if not test -f $deck_file; or not test -f $db_path
         echo "📡 NAS unavailable or local DB missing. Syncing latest state from Turso ($turso_db)..."
         set -l temp_dump (mktemp)
-        
+
         # Dump remote database state via turso shell
         turso db shell $turso_db ".dump" > $temp_dump 2>/dev/null
 
@@ -48,7 +52,7 @@ function study --description "Sync DB with Turso, launch Flashy TUI, and push st
             echo "✓ Successfully restored local state from Turso cloud."
         else
             rm -f $temp_dump
-            echo "⚠️  Could not pull state from Turso (or DB is empty). Proceeding with local state."
+            echo "⚠ Could not pull state from Turso (or DB is empty). Proceeding with local state."
         end
     end
 
@@ -60,14 +64,14 @@ function study --description "Sync DB with Turso, launch Flashy TUI, and push st
 
     # 3. LAUNCH FLASHY TUI
     echo "🚀 Launching Flashy for deck: $deck_name..."
-   
+
     # Temporarily force WezTerm's background to solid black (disable image layer)
-    wezterm cli set-config-overrides 'background = {{ source = { Color = "black" } }}' >/dev/null 2>&1
+    wezterm cli set-config-overrides 'background = [{ source = { Color = "black" } }]' >/dev/null 2>&1
 
     flashy ui --deck $deck_name
     set -l flashy_status $status
 
-  # Clear WezTerm config overrides to instantly restore your background image
+    # Clear WezTerm config overrides to instantly restore your background image
     wezterm cli set-config-overrides '' >/dev/null 2>&1
 
     # 4. POST-SESSION PUSH TO TURSO
@@ -79,7 +83,7 @@ function study --description "Sync DB with Turso, launch Flashy TUI, and push st
             if test $status -eq 0
                 echo "✓ Cloud backup complete!"
             else
-                echo "⚠️  Failed to sync post-session state to Turso."
+                echo "⚠ Failed to sync post-session state to Turso."
             end
         end
     end
