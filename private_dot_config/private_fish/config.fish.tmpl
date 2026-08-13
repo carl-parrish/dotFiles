@@ -117,6 +117,10 @@ if status is-interactive
             end
 
             # 1. Determine where zoxide *would* send us if we run 'z argv'
+            if test -e $argv[1]
+              builtin cd $argv; and zoxide add $PWD
+              return
+            end
             set -l target (zoxide query --exclude "$PWD" -- $argv 2>/dev/null)
 
             if test -n "$target"
