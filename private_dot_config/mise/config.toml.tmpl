@@ -1,6 +1,7 @@
 [tools]
 # --- Core Languages ---
 go = "1.25.4"
+java = "temurin-17"
 node = "22.21.0"
 python = "3.12"
 ruby = "3.3"
@@ -19,6 +20,7 @@ minikube = "1.33.1"
 "github:str4d/age-plugin-yubikey" = "latest"
 "npm:mcp-cron-darwin-arm64" = "latest"
 "cargo:lumen" = "latest"
+gradle = "latest"
 
 
 {{- else }}
@@ -68,7 +70,6 @@ minikube = "1.33.1"
 # --- Cargo/Rust Tools (Compiled) ---
 # Keeping 'cargo' to ensure ARM64 compatibility on Linux/Pi
 "cargo:eza" = "latest"
-"cargo:ripgrep" = "latest"
 "cargo:nu" = "latest"
 "cargo:jj-cli" = "latest"
 "cargo:dua-cli" = "latest"
@@ -91,6 +92,7 @@ uv = "latest"
 
 # --- Universal Binaries (Fast Install) ---
 # --- GitHub Binaries ---
+"github:BurntSushi/ripgrep" = "latest"
 "github:ActivityWatch/activitywatch" = "latest"
 "github:kopia/kopia" = "latest"
 "github:astral-sh/ruff" = "latest"
