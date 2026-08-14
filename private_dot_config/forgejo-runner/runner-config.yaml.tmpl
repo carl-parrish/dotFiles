@@ -1,0 +1,11 @@
+log:
+  level: info
+runner:
+  capacity: 1
+  envs: {}
+server:
+  connections:
+    forgejo:
+      url: https://git.deeplydigital.net/
+      uuid: {{ .secrets.FORGEJO_RUNNER_UUID }}
+      token: {{ .secrets.FORGEJO_RUNNER_TOKEN }}
