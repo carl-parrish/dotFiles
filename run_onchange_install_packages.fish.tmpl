@@ -1,0 +1,40 @@
+#!/usr/bin/env fish
+
+{{ if eq .chezmoi.os "darwin" -}}
+# --- macOS / Homebrew ---
+if type -q brew
+    echo "📦 Installing macOS packages via Homebrew..."
+    brew install w3m aerc
+else
+    echo "⚠️ Homebrew not found. Skipping brew bundle."
+end
+
+{{ else if eq .chezmoi.os "linux" -}}
+# --- CachyOS / Arch ---
+{{   if eq .chezmoi.osRelease.id "cachyos" "arch" -}}
+echo "📦 Installing Arch packages..."
+# Standard Repos
+sudo pacman -Syu --noconfirm w3m aerc
+
+# AUR / Cachy Repos
+if type -q paru
+    paru -S --noconfirm dlauncher
+end
+{{   end -}}
+
+# Bluefin / Fedora
+{{   if eq .chezmoi.osRelease.id "fedora" -}}
+echo "📦 Installing Fedora packages..."
+sudo dnf install -y w3m aerc
+{{   end -}}
+
+# Debian / Ubuntu / Mint
+{{   if eq .chezmoi.osRelease.id "debian" "ubuntu" "linuxmint" -}}
+echo "📦 Installing Debian/Ubuntu packages..."
+sudo apt install -y w3m aerc
+{{   end -}}
+
+{{ end -}}
+
+# --- Common Tooling ---
+install-antigravity
