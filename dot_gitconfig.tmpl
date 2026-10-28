@@ -1,0 +1,18 @@
+[init]
+	defaultBranch = main
+[user]
+	name = Carl Parrish
+  email = cparrish@sourcecodesamurai.com
+
+[includeIf "gitdir:**/workspace/biz/**"]
+	path = {{ .chezmoi.homeDir }}/.gitconfig-work
+
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+[pull]
+	rebase = true
+[core]
+  excludesfile = {{ .chezmoi.homeDir }}/.gitignore_global
+[push]
+  autoSetupRemote = true
+	default = current
