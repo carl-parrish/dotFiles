@@ -38,6 +38,7 @@ abbr -a jw    'jjw'
 abbr -a k     'kubectl'
 abbr -a tf    'tofu'
 abbr -a goo   'goose'
+abbr -a gr    'gt'
 
 # =============================================================================
 # --- Native Jujutsu Workspaces (Decoupled & Pure) ---
@@ -79,7 +80,8 @@ abbr -a -p anywhere -- -rmc 'rm --cached' #Use with `g -rmc` for `git rm --cache
 
 
 # Kubernetes Verbs (Works perfectly with 'k')
-abbr -a gt  -p anywhere 'get'
+#abbr -a gt  -p anywhere 'get'
+abbr -a gt -p anywhere -r '^(k|kubectl|git)\s+gt$' 'get'
 abbr -a d   -p anywhere 'describe'
 abbr -a p   -p anywhere 'pods'
 abbr -a n   -p anywhere 'nodes -o wide'
@@ -120,7 +122,8 @@ abbr -a trf   'tiron fmt'
 # Git Complex/Edge Cases
 abbr -a gfa   'git fetch --all --prune'
 abbr -a grm   'git rm'
-abbr -a g_push_upstream -p anywhere -r '^up$' -- 'origin (test -d .jj; and jj bookmark list -r @ | awk "{print \$1}"; or git branch --show-current) --set-upstream' #Use `g ph up` for `git push <branch name> --set-uprsteam`
+#abbr -a g_push_upstream -p anywhere -r '^up$' -- 'origin (test -d .jj; and jj bookmark list -r @ | awk "{print \$1}"; or git branch --show-current) --set-upstream' #Use `g ph up` for `git push <branch name> --set-uprsteam`
+abbr -a g_push_upstream -p anywhere -r '^(g|git|jj\s+git)\s+(ph|push)\s+up$' -- 'origin (test -d .jj; and jj bookmark list -r @ | awk "{print \$1}"; or git branch --show-current) --set-upstream'
 abbr -a glog  'git log --oneline --graph --decorate --all'
 alias gwip='git add -A; git rm (git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 
