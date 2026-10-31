@@ -24,8 +24,18 @@
 encryption = "age"
 
 [age]
+{{- $fleetIdentity := joinPath .chezmoi.homeDir ".config/chezmoi/fleet_identity.txt" }}
+{{- $yubiIdentity := joinPath .chezmoi.homeDir ".config/chezmoi/yubikey-identity.txt" }}
+
+{{- if and (hasKey . "role") (eq .role "server") }}
+    identity = "~/.config/chezmoi/fleet_identity.txt"
+{{- else if stat $fleetIdentity }}
+    identity = "~/.config/chezmoi/fleet_identity.txt"
+{{- else }}
     identity = "~/.config/chezmoi/yubikey-identity.txt"
-    recipient = "age1yubikey1q2mm9uxwlf03r37500kz3rtak6g5d8wuuqnkquspslqg6n20x7zsukw42wa"
+{{- end }}
+
+    recipientsFile = "~/.local/share/chezmoi/.age-recipients"
 
 [data]
     hostname = {{ $realHostname | quote }}

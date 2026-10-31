@@ -1,0 +1,9 @@
+# ~/.local/share/chezmoi/.age-recipients
+# Primary YubiKey
+age1yubikey1q2mm9uxwlf03r37500kz3rtak6g5d8wuuqnkquspslqg6n20x7zsukw42wa
+# Backup YubiKey
+age1yubikey1qggv7tmtrt0ey5uqaqmhs36h8ak2tany2rrq78qvgspqtnwkp2nrufplk7y
+# Server Key
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIXt5Ec9gf3fK+lNybEyeV/xAqhVq/3UDTPsaBQAp0ZA
+# Headless Server Fleet Key
+age1yfpyqtsvm3vexz3kw5zrxk5j2cxudlm7szj2fl46ulpmutsra55sksfx60
