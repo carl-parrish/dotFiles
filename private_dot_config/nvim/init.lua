@@ -1,7 +1,6 @@
-
-local _mise_python = vim.fn.trim(vim.fn.system("mise which python"))
-if _mise_python ~= "" then
-    vim.g.python3_host_prog = _mise_python
+local _mise_python = vim.fn.trim(vim.fn.system 'mise which python')
+if _mise_python ~= '' then
+  vim.g.python3_host_prog = _mise_python
 end
 
 --[[
@@ -288,36 +287,6 @@ require('lazy').setup({
         changedelete = { text = '~' },
       },
     },
-  },
-  { 'wakatime/vim-wakatime', lazy = false },
-  {
-    'lukas-reineke/indent-blankline.nvim',
-    main = 'ibl',
-    ---@module "ibl"
-    ---@type ibl.config
-    opts = {},
-  },
-  { 'nvim-tree/nvim-web-devicons', opts = {} },
-  { 'nvim-lualine/lualine.nvim', dependencies = { 'nvim-tree/nvim-web-devicons' },
-      config = function()
-      local function get_word_count()
-        if vim.bo.filetype == 'md' or vim.bo.filetype == 'markdown' then
-          local icon = '\u{e6a5}'
-          local words = vim.fn.wordcount().words
-          return string.format('%s %s', words, icon)
-        end
-	return ''
-      end
-
-      require('lualine').setup {
-        sections = {
-          lualine_x = {
-            { get_word_count },
-	    'filetype',
-          },
-        },
-      }
-    end,
   },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
@@ -720,8 +689,8 @@ require('lazy').setup({
         ts_ls = {},
         --
         terraformls = {
-    filetypes = { "terraform", "tf", "terraform-vars", "tofu" },
-  },
+          filetypes = { 'terraform', 'tf', 'terraform-vars', 'tofu' },
+        },
 
         lua_ls = {
           -- cmd = { ... },
@@ -954,7 +923,12 @@ require('lazy').setup({
   },
 
   -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  {
+    'folke/todo-comments.nvim',
+    event = 'VimEnter',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    opts = { signs = false },
+  },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
@@ -974,21 +948,6 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
-      -- Simple and easy statusline.
-      --  You could remove this setup call if you don't like it,
-      --  and try some other statusline plugin
-      local statusline = require 'mini.statusline'
-      -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
-
-      -- You can configure sections in the statusline by overriding their
-      -- default behavior. For example, here we set the section for
-      -- cursor location to LINE:COLUMN
-      ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
-
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
@@ -999,7 +958,19 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = {
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1039,7 +1010,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
@@ -1066,13 +1037,13 @@ require('lazy').setup({
     },
   },
 })
-vim.filetype.add({
+vim.filetype.add {
   extension = {
-    tf = "terraform",
-    tfvars = "terraform-vars",
-    tofu = "terraform",
+    tf = 'terraform',
+    tfvars = 'terraform-vars',
+    tofu = 'terraform',
   },
-})
+}
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 vim.opt.expandtab = true
