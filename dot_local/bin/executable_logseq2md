@@ -1,0 +1,71 @@
+#!/usr/bin/env nu
+
+# Convert a Logseq note into clean long-form Markdown in Documents/MarkDown
+def main [
+    src: path,           # Path to source Logseq .md file
+    out_name?: string    # Optional output filename (defaults to source basename)
+] {
+    if not ($src | path exists) {
+        error make { msg: $"File not found: ($src)" }
+    }
+
+    # Resolve OS-specific destination directory
+    let dest_dir = if ("/Volumes/Documents/MarkDown" | path exists) {
+        "/Volumes/Documents/MarkDown"
+    } else if ("/mnt/nas/Documents/MarkDown" | path exists) {
+        "/mnt/nas/Documents/MarkDown"
+    } else {
+        error make { msg: "Neither /Volumes/Documents/MarkDown nor /mnt/nas/Documents/MarkDown is mounted." }
+    }
+
+    let filename = ($out_name | default ($src | path basename))
+    let dest = ($dest_dir | path join $filename)
+
+    # Fold over every line with an explicit { in_code, lines } accumulator
+    let state = (
+        open --raw $src
+        | lines
+        | reduce --fold { in_code: false, lines: [] } { |line, acc|
+            let trimmed = ($line | str trim --left)
+
+            # 1. Toggle fenced code block state (``` or ~~~) and pass fence line verbatim
+            if ($trimmed | str starts-with "```") or ($trimmed | str starts-with "~~~") {
+                {
+                    in_code: (not $acc.in_code),
+                    lines: ($acc.lines | append $line)
+                }
+            # 2. Inside a code block: preserve every character untouched
+            } else if $acc.in_code {
+                {
+                    in_code: true,
+                    lines: ($acc.lines | append $line)
+                }
+            # 3. Outside code block: skip Logseq block/page properties (id::, collapsed::, tags::)
+            } else if ($line =~ '^\s*[a-zA-Z0-9_-]+::\s*') {
+                $acc
+            # 4. Outside code block: clean Logseq outliner formatting
+            } else {
+                let clean_line = (
+                    $line
+                    | str replace -r '^- ((TODO|DOING|DONE|LATER|NOW|WAITING)\s+)?' ''
+                    | str replace -r '^(  |\t)' ''
+                    | str replace -a -r '\[\[([^\]]+)\]\]' '$1'
+                )
+                {
+                    in_code: false,
+                    lines: ($acc.lines | append $clean_line)
+                }
+            }
+        }
+    )
+
+    let output = (
+        $state.lines
+        | str join "\n"
+        | str replace -a -r '\n{3,}' "\n\n"
+        | str trim
+    )
+
+    $"($output)\n" | save -f $dest
+    print $"Exported clean Markdown -> ($dest)"
+}
