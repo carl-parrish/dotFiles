@@ -137,6 +137,7 @@ alias mcheck="echo '--- Mise Status ---'; mise ls; echo '--- Missing Tools ---';
 alias mdoctor="mise doctor"
 abbr -a mug   'mise use -g'
 abbr -a mlg   'mise ls --global'
+abbr -a mlt   "mise ls --json | nu --stdin -c 'from json | transpose tool v | flatten v | flatten | select tool version active'"
 
 # Pi Agents
 abbr -a bigpi 'pi --model opencode/big-pickle'
